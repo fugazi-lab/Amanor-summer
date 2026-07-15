@@ -3,9 +3,15 @@
     nested replies, collapsible threads, warm vibes only.
 */
 
+import { Ledger_400Regular } from "@expo-google-fonts/ledger";
+import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
+import { useFonts } from "expo-font";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -16,14 +22,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Image,
 } from "react-native";
-import { useEffect, useState } from "react";
-import { useLocalSearchParams, useRouter } from "expo-router";
 import { Client, Databases, ID, Query } from "react-native-appwrite";
-import { useFonts } from "expo-font";
-import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
-import { Ledger_400Regular } from "@expo-google-fonts/ledger";
 
 const APPWRITE_CONFIG = {
   endpoint: "https://cloud.appwrite.io/v1",
@@ -443,3 +443,5 @@ const styles = StyleSheet.create({
   },
   sendBtnText: { color: C.white, fontSize: 20, fontWeight: "bold" },
 });
+
+//testing branches
