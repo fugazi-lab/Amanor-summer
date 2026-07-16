@@ -1,76 +1,67 @@
 /*
     files.jsx — your media locker.
-    pick a file → give it a name, description, and company → upload.
+    pick a file → give it a name, description, and company → saved LOCALLY on device.
+
+    Uploads are no longer sent to Appwrite. The file itself is copied into this
+    app's private document directory, and its metadata (name/company/description/
+    username) is kept in AsyncStorage as a simple JSON index.
+
+    Install first:
+      npx expo install expo-file-system @react-native-async-storage/async-storage
+
+    NOTE: because everything lives on-device now, other screens that used to read
+    the Appwrite "files" collection (flagged.jsx, report-pick.jsx) will NOT see
+    these files anymore — there is no server-side copy to query.
 */
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Audio, ResizeMode, Video } from "expo-av";
+import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system";
+import { useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import {
-  StyleSheet,
-  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  RefreshControl,
   SafeAreaView,
   ScrollView,
-  View,
+  StyleSheet,
   Text,
-  Alert,
-  ActivityIndicator,
-  RefreshControl,
-  Platform,
-  Modal,
   TextInput,
-  KeyboardAvoidingView,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { useState, useEffect, useCallback } from "react";
-import { useLocalSearchParams } from "expo-router";
-import * as DocumentPicker from "expo-document-picker";
-import { Audio, Video, ResizeMode } from "expo-av";
 
-// ── NATIVE SDK ───────────────────────────────────────────────
-import {
-  Client     as NativeClient,
-  Databases  as NativeDatabases,
-  Storage    as NativeStorage,
-  Query      as NativeQuery,
-  ID         as NativeID,
-} from "react-native-appwrite";
+// ── LOCAL STORAGE CONFIG ─────────────────────────────────────
+const MEDIA_DIR = `${FileSystem.documentDirectory}amanor_media/`;
+const INDEX_KEY = "amanor_files_index_v1";
 
-// ── WEB SDK ──────────────────────────────────────────────────
-import {
-  Client     as WebClient,
-  Databases  as WebDatabases,
-  Storage    as WebStorage,
-  Query      as WebQuery,
-  ID         as WebID,
-} from "appwrite";
-
-// ── CONFIG ───────────────────────────────────────────────────
-const CFG = {
-  endpoint:   "https://cloud.appwrite.io/v1",
-  projectId:  "69af49d80022d666076a",
-  dbId:       "69b0806500366fecf954",
-  filesColId: "files",
-  bucketId:   "69b5e659000ecd76ce30",
+const ensureMediaDir = async () => {
+  const info = await FileSystem.getInfoAsync(MEDIA_DIR);
+  if (!info.exists) {
+    await FileSystem.makeDirectoryAsync(MEDIA_DIR, { intermediates: true });
+  }
 };
 
-// ── PLATFORM CLIENT ──────────────────────────────────────────
-let db, stor, Query, ID;
+const genId = () =>
+  `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 
-if (Platform.OS === "web") {
-  const wc = new WebClient()
-    .setEndpoint(CFG.endpoint)
-    .setProject(CFG.projectId);
-  db    = new WebDatabases(wc);
-  stor  = new WebStorage(wc);
-  Query = WebQuery;
-  ID    = WebID;
-} else {
-  const nc = new NativeClient()
-    .setEndpoint(CFG.endpoint)
-    .setProject(CFG.projectId)
-    .setPlatform("com.meetstartap.app");
-  db    = new NativeDatabases(nc);
-  stor  = new NativeStorage(nc);
-  Query = NativeQuery;
-  ID    = NativeID;
-}
+const readIndex = async () => {
+  try {
+    const raw = await AsyncStorage.getItem(INDEX_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+};
+
+const writeIndex = async (list) => {
+  await AsyncStorage.setItem(INDEX_KEY, JSON.stringify(list));
+};
 
 // ── COLOURS ──────────────────────────────────────────────────
 const C = {
@@ -95,30 +86,50 @@ const formatDate = (dateStr) => {
 const getErrMsg = (err) => {
   if (!err) return "Unknown error.";
   if (typeof err === "string") return err;
-  return err.message || err.response?.message || JSON.stringify(err) || "Unknown error.";
+  return err.message || JSON.stringify(err) || "Unknown error.";
 };
 
-const getFileViewURL = (fileId) =>
-  `${CFG.endpoint}/storage/buckets/${CFG.bucketId}/files/${fileId}/view?project=${CFG.projectId}`;
+const extFromName = (name) => {
+  const m = /\.[^/.]+$/.exec(name || "");
+  return m ? m[0] : "";
+};
 
-// ── UPLOAD ───────────────────────────────────────────────────
-const uploadFile = async (asset) => {
-  const fileId = ID.unique();
+// ── SAVE FILE TO DEVICE ──────────────────────────────────────
+// Copies the picked asset into this app's private document directory and
+// returns the local file:// URI that the record should point to.
+const saveFileLocally = async (asset, id) => {
+  await ensureMediaDir();
+  const dest = `${MEDIA_DIR}${id}${extFromName(asset.name)}`;
+
   if (Platform.OS === "web") {
+    // On web there's no real filesystem — persist the picked file as a
+    // base64 data URI inside AsyncStorage-backed metadata instead of copying.
     if (!asset.file) throw new Error("No file object. Try re-selecting the file.");
-    return await stor.createFile(CFG.bucketId, fileId, asset.file);
-  } else {
-    return await stor.createFile(CFG.bucketId, fileId, {
-      uri:  asset.uri,
-      name: asset.name,
-      type: asset.mimeType || "application/octet-stream",
-      size: asset.size || 0,
+    const dataUri = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error("Could not read file."));
+      reader.readAsDataURL(asset.file);
     });
+    return dataUri;
+  }
+
+  await FileSystem.copyAsync({ from: asset.uri, to: dest });
+  return dest;
+};
+
+const deleteFileLocally = async (uri) => {
+  if (!uri || Platform.OS === "web") return; // data URIs need no cleanup
+  try {
+    const info = await FileSystem.getInfoAsync(uri);
+    if (info.exists) await FileSystem.deleteAsync(uri, { idempotent: true });
+  } catch {
+    // best-effort cleanup only
   }
 };
 
 // ── AUDIO PLAYER ─────────────────────────────────────────────
-function AudioRow({ file, url }) {
+function AudioRow({ file, onDelete }) {
   const [sound, setSound]     = useState(null);
   const [playing, setPlaying] = useState(false);
 
@@ -130,7 +141,7 @@ function AudioRow({ file, url }) {
       } else {
         await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
         const { sound: s } = await Audio.Sound.createAsync(
-          { uri: url }, { shouldPlay: true }
+          { uri: file.localUri }, { shouldPlay: true }
         );
         s.setOnPlaybackStatusUpdate((st) => { if (st.didJustFinish) setPlaying(false); });
         setSound(s);
@@ -150,17 +161,20 @@ function AudioRow({ file, url }) {
         <Text style={styles.fileName} numberOfLines={1}>{file.name || file.fileName}</Text>
         {!!file.company && <Text style={styles.fileCompany}>🏢 {file.company}</Text>}
         {!!file.description && <Text style={styles.fileDesc} numberOfLines={2}>{file.description}</Text>}
-        <Text style={styles.fileMeta}>{formatDate(file.$createdAt)}</Text>
+        <Text style={styles.fileMeta}>{formatDate(file.createdAt)}</Text>
       </View>
       <TouchableOpacity style={styles.playButton} onPress={togglePlay}>
         <Text style={styles.playButtonText}>{playing ? "⏸" : "▶"}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.deleteButton} onPress={() => onDelete(file)}>
+        <Text style={styles.deleteButtonText}>🗑</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
 // ── VIDEO PLAYER ─────────────────────────────────────────────
-function VideoRow({ file, url }) {
+function VideoRow({ file, onDelete }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -171,7 +185,7 @@ function VideoRow({ file, url }) {
           {!!file.company && <Text style={styles.fileCompany}>🏢 {file.company}</Text>}
           {!!file.description && <Text style={styles.fileDesc}>{file.description}</Text>}
           <Video
-            source={{ uri: url }}
+            source={{ uri: file.localUri }}
             style={styles.videoPlayer}
             useNativeControls
             resizeMode={ResizeMode.CONTAIN}
@@ -190,10 +204,13 @@ function VideoRow({ file, url }) {
             <Text style={styles.fileName} numberOfLines={1}>{file.name || file.fileName}</Text>
             {!!file.company && <Text style={styles.fileCompany}>🏢 {file.company}</Text>}
             {!!file.description && <Text style={styles.fileDesc} numberOfLines={2}>{file.description}</Text>}
-            <Text style={styles.fileMeta}>{formatDate(file.$createdAt)}</Text>
+            <Text style={styles.fileMeta}>{formatDate(file.createdAt)}</Text>
           </View>
           <TouchableOpacity style={styles.playButton} onPress={() => setExpanded(true)}>
             <Text style={styles.playButtonText}>▶</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.deleteButton} onPress={() => onDelete(file)}>
+            <Text style={styles.deleteButtonText}>🗑</Text>
           </TouchableOpacity>
         </>
       )}
@@ -207,7 +224,6 @@ export default function FilesScreen() {
   const user = username || "anon";
 
   const [files, setFiles]           = useState([]);
-  const [fileURLs, setFileURLs]     = useState({});
   const [loading, setLoading]       = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [uploading, setUploading]   = useState(false);
@@ -219,21 +235,14 @@ export default function FilesScreen() {
   const [inputCompany, setInputCompany] = useState("");
   const [inputDesc, setInputDesc]       = useState("");
 
-  // ── FETCH ─────────────────────────────────────────────────
+  // ── FETCH (from local AsyncStorage index) ──────────────────
   const fetchFiles = async () => {
     try {
-      const res = await db.listDocuments(
-        CFG.dbId,
-        CFG.filesColId,
-        [Query.equal("username", user), Query.limit(100)]
-      );
-      const docs = res.documents;
-      const urls = {};
-      for (const f of docs) {
-        urls[f.fileId] = getFileViewURL(f.fileId);
-      }
-      setFiles(docs.reverse());
-      setFileURLs(urls);
+      const all = await readIndex();
+      const mine = all
+        .filter((f) => f.username === user)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setFiles(mine);
     } catch (err) {
       console.error("Fetch error:", getErrMsg(err));
       Alert.alert("Error", "Couldn't load your files.\n" + getErrMsg(err));
@@ -271,7 +280,7 @@ export default function FilesScreen() {
     }
   };
 
-  // ── STEP 2: submit modal → upload ─────────────────────────
+  // ── STEP 2: submit modal → save on device ─────────────────
   const handleSubmitUpload = async () => {
     if (!inputName.trim()) {
       Alert.alert("Name required", "Please give your file a name.");
@@ -287,33 +296,58 @@ export default function FilesScreen() {
     setUploading(true);
 
     try {
-      const uploaded = await uploadFile(pendingAsset);
-      console.log("Uploaded:", uploaded.$id);
+      const id = genId();
+      const localUri = await saveFileLocally(pendingAsset, id);
 
-      await db.createDocument(
-        CFG.dbId,
-        CFG.filesColId,
-        ID.unique(),
-        {
-          fileId:      uploaded.$id,
-          username:    user,
-          fileName:    pendingAsset.name,
-          mimeType:    pendingAsset.mimeType || "application/octet-stream",
-          name:        inputName.trim(),
-          company:     inputCompany.trim(),
-          description: inputDesc.trim(),
-        }
-      );
+      const record = {
+        id,
+        localUri,
+        username:    user,
+        fileName:    pendingAsset.name,
+        mimeType:    pendingAsset.mimeType || "application/octet-stream",
+        name:        inputName.trim(),
+        company:     inputCompany.trim(),
+        description: inputDesc.trim(),
+        createdAt:   new Date().toISOString(),
+      };
 
-      Alert.alert("Uploaded!", `"${inputName.trim()}" is ready.`);
+      const all = await readIndex();
+      all.push(record);
+      await writeIndex(all);
+
+      Alert.alert("Saved!", `"${inputName.trim()}" is saved on this device.`);
       fetchFiles();
     } catch (err) {
-      console.error("Upload error:", getErrMsg(err));
-      Alert.alert("Upload failed", getErrMsg(err));
+      console.error("Save error:", getErrMsg(err));
+      Alert.alert("Save failed", getErrMsg(err));
     } finally {
       setUploading(false);
       setPendingAsset(null);
     }
+  };
+
+  const handleDeleteFile = (file) => {
+    Alert.alert(
+      "Delete file?",
+      `Remove "${file.name}" from this device? This can't be undone.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteFileLocally(file.localUri);
+              const all = await readIndex();
+              await writeIndex(all.filter((f) => f.id !== file.id));
+              fetchFiles();
+            } catch (err) {
+              Alert.alert("Delete failed", getErrMsg(err));
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleCancelModal = () => {
@@ -331,7 +365,7 @@ export default function FilesScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Your Media 🎧</Text>
         <Text style={styles.headerSub}>
-          audio and video files — private to you, {user}.
+          audio and video files — stored only on this device, {user}.
         </Text>
       </View>
 
@@ -350,10 +384,10 @@ export default function FilesScreen() {
           {uploading ? (
             <View style={styles.uploadingRow}>
               <ActivityIndicator color="#fff" style={{ marginRight: 10 }} />
-              <Text style={styles.uploadButtonText}>Uploading...</Text>
+              <Text style={styles.uploadButtonText}>Saving...</Text>
             </View>
           ) : (
-            <Text style={styles.uploadButtonText}>＋ Upload Audio or Video</Text>
+            <Text style={styles.uploadButtonText}>＋ Add Audio or Video</Text>
           )}
         </TouchableOpacity>
 
@@ -364,16 +398,14 @@ export default function FilesScreen() {
         ) : files.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyEmoji}>📭</Text>
-            <Text style={styles.emptyText}>no files yet. upload something!</Text>
+            <Text style={styles.emptyText}>no files yet. add something!</Text>
           </View>
         ) : (
           files.map((file) => {
-            const url = fileURLs[file.fileId];
-            if (!url) return null;
-            if (isAudio(file.mimeType)) return <AudioRow key={file.$id} file={file} url={url} />;
-            if (isVideo(file.mimeType)) return <VideoRow key={file.$id} file={file} url={url} />;
+            if (isAudio(file.mimeType)) return <AudioRow key={file.id} file={file} onDelete={handleDeleteFile} />;
+            if (isVideo(file.mimeType)) return <VideoRow key={file.id} file={file} onDelete={handleDeleteFile} />;
             return (
-              <View key={file.$id} style={styles.fileCard}>
+              <View key={file.id} style={styles.fileCard}>
                 <View style={styles.fileIconBox}>
                   <Text style={styles.fileEmoji}>📁</Text>
                 </View>
@@ -381,8 +413,11 @@ export default function FilesScreen() {
                   <Text style={styles.fileName}>{file.name || file.fileName}</Text>
                   {!!file.company && <Text style={styles.fileCompany}>🏢 {file.company}</Text>}
                   {!!file.description && <Text style={styles.fileDesc}>{file.description}</Text>}
-                  <Text style={styles.fileMeta}>{formatDate(file.$createdAt)}</Text>
+                  <Text style={styles.fileMeta}>{formatDate(file.createdAt)}</Text>
                 </View>
+                <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteFile(file)}>
+                  <Text style={styles.deleteButtonText}>🗑</Text>
+                </TouchableOpacity>
               </View>
             );
           })
@@ -456,7 +491,7 @@ export default function FilesScreen() {
                   style={[styles.modalBtn, styles.uploadBtn]}
                   onPress={handleSubmitUpload}
                 >
-                  <Text style={[styles.modalBtnText, { fontWeight: "800" }]}>Upload</Text>
+                  <Text style={[styles.modalBtnText, { fontWeight: "800" }]}>Save</Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>
@@ -528,6 +563,12 @@ const styles = StyleSheet.create({
     borderRadius: 20, alignItems: "center", justifyContent: "center", marginLeft: 8,
   },
   playButtonText: { fontSize: 16, color: "#fff" },
+
+  deleteButton: {
+    backgroundColor: "#f0e0e0", width: 36, height: 36,
+    borderRadius: 18, alignItems: "center", justifyContent: "center", marginLeft: 8,
+  },
+  deleteButtonText: { fontSize: 14 },
 
   videoPlayer: {
     width: "100%", height: 200, borderRadius: 10,
