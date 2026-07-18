@@ -3,19 +3,19 @@
     fonts: Otomanopee One + Ledger
 */
 
+import { Ledger_400Regular } from "@expo-google-fonts/ledger";
+import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
+import { useFonts } from "expo-font";
+import { useRouter } from "expo-router";
 import {
+  ActivityIndicator,
+  Image,
+  SafeAreaView,
   StyleSheet,
-  View,
   Text,
   TouchableOpacity,
-  SafeAreaView,
-  Image,
-  ActivityIndicator,
+  View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { useFonts } from "expo-font";
-import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
-import { Ledger_400Regular } from "@expo-google-fonts/ledger";
 
 const C = {
   bg:       "#f5f0e0",
@@ -63,7 +63,7 @@ export default function WelcomeScreen() {
         {/* ── GET STARTED BUTTON ── */}
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.replace("/auth")}
+          onPress={() => router.replace("/role-pick")}
           activeOpacity={0.85}
         >
           <Text style={styles.buttonText}>Get Started</Text>
