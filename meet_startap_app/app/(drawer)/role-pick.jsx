@@ -11,14 +11,13 @@ import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
 import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Image,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 
 const C = {
@@ -72,7 +71,7 @@ export default function RolePickScreen() {
           {/* A Therapist */}
           <TouchableOpacity
             style={styles.optionBtn}
-            onPress={() => Alert.alert("Coming Soon", "Therapist login will be available soon.")}
+            onPress={() => router.replace("/auth-therapist")}
             activeOpacity={0.85}
           >
             <Text style={styles.optionTitle}>A Therapist</Text>
