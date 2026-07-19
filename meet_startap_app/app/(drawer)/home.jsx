@@ -5,20 +5,20 @@
       incident.png, rights.png, support.png, flaged.png, donate.png, recording.png
 */
 
+import { Ledger_400Regular } from "@expo-google-fonts/ledger";
+import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
+import { useFonts } from "expo-font";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
-  StyleSheet,
-  TouchableOpacity,
+  ActivityIndicator,
+  Image,
   SafeAreaView,
   ScrollView,
-  View,
+  StyleSheet,
   Text,
-  Image,
-  ActivityIndicator,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useFonts } from "expo-font";
-import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
-import { Ledger_400Regular } from "@expo-google-fonts/ledger";
 
 const C = {
   bg:       "#F5F0E4",
@@ -47,7 +47,7 @@ const FEATURES = [
   },
   {
     id: "index",
-    pathname: "/(drawer)/",
+    pathname: "/(drawer)/emotional-help",
     params: {},
     icon: require("../../assets/icons/support.png"),
     title: "Get Emotional Support",
