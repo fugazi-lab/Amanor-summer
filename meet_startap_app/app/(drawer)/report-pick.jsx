@@ -12,33 +12,17 @@ import {
   ScrollView,
   Image,
   ActivityIndicator,
-  Platform,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
 import { useFonts } from "expo-font";
 import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
 import { Ledger_400Regular } from "@expo-google-fonts/ledger";
+// Reads the local evidence list.
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// ── SDK ──────────────────────────────────────────────────────
-import { Client as NativeClient, Databases as NativeDatabases, Query as NativeQuery } from "react-native-appwrite";
-import { Client as WebClient, Databases as WebDatabases, Query as WebQuery } from "appwrite";
-
-const CFG = {
-  endpoint:   "https://cloud.appwrite.io/v1",
-  projectId:  "69af49d80022d666076a",
-  dbId:       "69b0806500366fecf954",
-  filesColId: "files",
-};
-
-let db, Query;
-if (Platform.OS === "web") {
-  const wc = new WebClient().setEndpoint(CFG.endpoint).setProject(CFG.projectId);
-  db = new WebDatabases(wc); Query = WebQuery;
-} else {
-  const nc = new NativeClient().setEndpoint(CFG.endpoint).setProject(CFG.projectId).setPlatform("com.meetstartap.app");
-  db = new NativeDatabases(nc); Query = NativeQuery;
-}
+// Same storage key as files.jsx.
+const FILES_INDEX_KEY = "amanor_files_index_v1";
 
 const C = {
   bg:       "#F5F0E4",
@@ -63,13 +47,24 @@ export default function ReportPickScreen() {
 
   const [fontsLoaded] = useFonts({ OtomanopeeOne_400Regular, Ledger_400Regular });
 
+  // Load evidence saved on this device.
   useEffect(() => {
     const fetch = async () => {
       try {
-        const res = await db.listDocuments(CFG.dbId, CFG.filesColId, [Query.limit(100)]);
-        setFiles(res.documents);
+        const storedIndex = await AsyncStorage.getItem(FILES_INDEX_KEY);
+        const localFiles = storedIndex ? JSON.parse(storedIndex) : [];
+
+        // Show newest files first.
+        setFiles(
+          Array.isArray(localFiles)
+            ? localFiles.sort(
+                (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+              )
+            : []
+        );
       } catch (e) {
-        console.error(e);
+        console.error("Could not load local evidence:", e);
+        setFiles([]);
       } finally {
         setLoading(false);
       }
@@ -80,7 +75,8 @@ export default function ReportPickScreen() {
   const toggle = (id) => {
     setSelected(prev => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   };
@@ -117,12 +113,13 @@ export default function ReportPickScreen() {
           <Text style={styles.emptyText}>No recordings found. You can continue without attaching any.</Text>
         ) : (
           files.map((file) => {
-            const isSelected = selected.has(file.$id);
+            // Local files use id instead of Appwrite's $id.
+            const isSelected = selected.has(file.id);
             return (
               <TouchableOpacity
-                key={file.$id}
+                key={file.id}
                 style={[styles.fileCard, isSelected && styles.fileCardSelected]}
-                onPress={() => toggle(file.$id)}
+                onPress={() => toggle(file.id)}
                 activeOpacity={0.82}
               >
                 <Text style={styles.fileEmoji}>
@@ -131,7 +128,7 @@ export default function ReportPickScreen() {
                 <View style={styles.fileInfo}>
                   <Text style={styles.fileName} numberOfLines={1}>{file.name || file.fileName}</Text>
                   {!!file.company && <Text style={styles.fileCompany}>{file.company}</Text>}
-                  <Text style={styles.fileMeta}>{formatDate(file.$createdAt)}</Text>
+                  <Text style={styles.fileMeta}>{formatDate(file.createdAt)}</Text>
                 </View>
                 <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
                   {isSelected && <Text style={styles.checkmark}>✓</Text>}
