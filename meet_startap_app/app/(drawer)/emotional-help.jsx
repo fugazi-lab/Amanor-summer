@@ -12,13 +12,12 @@ import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
 import {
   ActivityIndicator,
-  Alert,
   Image,
   SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 const C = {
@@ -79,7 +78,7 @@ export default function EmotionalHelpScreen() {
           {/* A Meeting With A Therapy */}
           <TouchableOpacity
             style={styles.optionBtn}
-            onPress={() => Alert.alert("Coming Soon", "This feature will be available soon.")}
+            onPress={() => router.push("/(drawer)/schedule-meeting")}
             activeOpacity={0.85}
           >
             <Text style={styles.optionText}>A Meeting With A{"\n"}Therapy</Text>
