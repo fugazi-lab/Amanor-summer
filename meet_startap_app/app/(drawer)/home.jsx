@@ -30,12 +30,12 @@ const C = {
 
 const FEATURES = [
   {
-    id: "report",
-    pathname: "/(drawer)/report",
+    id: "files",
+    pathname: "/(drawer)/files",
     params: {},
     icon: require("../../assets/icons/incident.png"),
-    title: "Report an Incident",
-    desc: "Report anonymously or with your name",
+    title: "Saved Evidence",
+    desc: "Access all evidence in one place",
   },
   {
     id: "legal",
@@ -54,21 +54,29 @@ const FEATURES = [
     desc: "Access the survivor support network",
   },
   {
-    id: "flagged",
-    pathname: "/(drawer)/flagged",
+    id: "report",
+    pathname: "/(drawer)/report",
     params: {},
-    icon: require("../../assets/icons/flaged.png"),
-    title: "Check Out Flagged Workplaces",
-    desc: "Check reports before choosing a workplace",
+    icon: require("../../assets/icons/incident.png"),
+    title: "Report An Incident",
+    desc: "File a complaint through AmanOr, to inform your compnay.",
   },
-  {
-    id: "donate",
-    pathname: "/(drawer)/donate",
-    params: {},
-    icon: require("../../assets/icons/donate.png"),
-    title: "Donate to Keep Workplaces Safe",
-    desc: "Help empower women and protect workplaces",
-  },
+  // {
+  //   id: "flagged",
+  //   pathname: "/(drawer)/flagged",
+  //   params: {},
+  //   icon: require("../../assets/icons/flaged.png"),
+  //   title: "Check Out Flagged Workplaces",
+  //   desc: "Check reports before choosing a workplace",
+  // },
+  // {
+  //   id: "donate",
+  //   pathname: "/(drawer)/donate",
+  //   params: {},
+  //   icon: require("../../assets/icons/donate.png"),
+  //   title: "Donate to Keep Workplaces Safe",
+  //   desc: "Help empower women and protect workplaces",
+  // },
   {
     id: "Recording2",
     pathname: "/(drawer)/Recording2",
@@ -77,14 +85,7 @@ const FEATURES = [
     title: "Set Up Recording",
     desc: "Choose a trigger word to set up voice-activated recording",
   },
-  {
-    id: "files",
-    pathname: "/(drawer)/files",
-    params: {},
-    icon: require("../../assets/icons/files.png"),
-    title: "My Evidence",
-    desc: "View and manage your uploaded audio and video evidence",
-  },
+  
 ];
 
 export default function HomeScreen() {
