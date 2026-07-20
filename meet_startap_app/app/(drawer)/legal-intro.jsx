@@ -63,9 +63,9 @@ export default function LegalIntroScreen() {
         <Text style={styles.title}>Your Legal Rights</Text>
 
         {/* ── SUBTITLE ── */}
-        <Text style={styles.subtitle}>
+        {/* <Text style={styles.subtitle}>
           Learn Your Rights Against{"\n"}Workplace Sexual Harassment
-        </Text>
+        </Text> */}
 
         <View style={{ height: 40 }} />
 
@@ -75,45 +75,47 @@ export default function LegalIntroScreen() {
           onPress={() => router.push("/(drawer)/legal-what")}
           activeOpacity={0.85}
         >
-          <View style={styles.btnIconCircle}>
-            <Text style={styles.btnIconText}>ℹ</Text>
-          </View>
           <Text style={styles.btnText}>
-            What Is Workplace Sexual{"\n"}Harassment?
+          What Is Workplace Sexual{"\n"}Harassment?
           </Text>
         </TouchableOpacity>
 
         <View style={{ height: 16 }} />
 
-        {/* ── BUTTON 2: Your Rights & Legal Options ── */}
+        {/* ── BUTTON 2: Examples of Sexual Harassment ── */}
         <TouchableOpacity
-          style={[styles.btn, { backgroundColor: C.btnBrown }]}
+          style={[styles.btn, { backgroundColor: C.btnPink }]}
+          onPress={() => router.push("/(drawer)/legal-what")}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.btnText}>
+            Examples of Sexual{"\n"}Harassment
+          </Text>
+        </TouchableOpacity>
+
+        <View style={{ height: 16 }} />
+
+        {/* ── BUTTON 3: Your Rights & Legal Options ── */}
+        <TouchableOpacity
+          style={[styles.btn, { backgroundColor: C.btnPink }]}
           onPress={() => router.push("/(drawer)/legal")}
           activeOpacity={0.85}
         >
-          <View style={[styles.btnIconCircle, { borderColor: "rgba(255,255,255,0.5)" }]}>
-            <Text style={styles.btnIconText}>⚖️</Text>
-          </View>
-          <Text style={styles.btnText}>
-            Your Rights & Legal{"\n"}Options
-          </Text>
+          <Text style={styles.btnText}>Your Rights</Text>
         </TouchableOpacity>
 
         <View style={{ height: 16 }} />
 
-        {/* ── BUTTON 3: Get Professional Legal Guidance ── */}
+        {/* ── BUTTON 3: Get Professional Legal Guidance ──
         <TouchableOpacity
           style={[styles.btn, { backgroundColor: C.btnPink }]}
           onPress={() => router.push("/(drawer)/legal-lawyer")}
           activeOpacity={0.85}
         >
-          <View style={styles.btnIconCircle}>
-            <Text style={styles.btnIconText}>👩‍⚖️</Text>
-          </View>
           <Text style={styles.btnText}>
             Get Professional Legal{"\n"}Guidance
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
       </View>
     </SafeAreaView>
@@ -163,6 +165,7 @@ const styles = StyleSheet.create({
   btn: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     borderRadius: 16,
     paddingVertical: 18,
     paddingHorizontal: 18,
@@ -193,5 +196,6 @@ const styles = StyleSheet.create({
     color: C.white,
     lineHeight: 23,
     flex: 1,
+    textAlign: "center",
   },
 });
