@@ -163,7 +163,7 @@ export default function AuthScreen() {
           <View style={styles.inputWrap}>
             <TextInput
               style={styles.input}
-              placeholder="Username (Anonymous or nickname)"
+              placeholder="Username (Real or Anonymous)"
               placeholderTextColor={C.muted}
               autoCapitalize="none"
               autoCorrect={false}
@@ -172,12 +172,12 @@ export default function AuthScreen() {
             />
           </View>
 
-          {/* hint only on signup */}
+          {/* hint only on signup
           {!isLogin && (
             <Text style={styles.hint}>
               * Use an anonymous nickname. Do not use your real name.
             </Text>
-          )}
+          )} */}
 
           <View style={{ height: 32 }} />
 

@@ -741,17 +741,14 @@ export default function RecordingSetupScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* ── Title ── */}
-        <Text style={styles.title}>Set Up Voice-{"\n"}Activated Recording</Text>
+        <Text style={styles.title}>Set Up Voice-{"\n"}Triggered Recording</Text>
 
         {/* ── Thin rule under title ── */}
         <View style={styles.rule} />
 
-        {/* ── Divider ── */}
-        <View style={styles.divider} />
-
         {/* ── Subtitle ── */}
         <Text style={styles.subtitle}>
-          Choose a trigger word and configure you{"\n"}AmanOr assistant
+          Choose a trigger word and configure your{"\n"}AmanOr assistant
         </Text>
 
         {/* ── Step 1 ── */}

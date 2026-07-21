@@ -75,7 +75,7 @@ export default function LegalIntroScreen() {
           activeOpacity={0.85}
         >
           <Text style={styles.btnText}>
-          What Is Workplace Sexual{"\n"}Harassment?
+          What is workplace{"\n"}Sexual Harassment?
           </Text>
         </TouchableOpacity>
 
@@ -88,7 +88,7 @@ export default function LegalIntroScreen() {
           activeOpacity={0.85}
         >
           <Text style={styles.btnText}>
-            Examples of Sexual{"\n"}Harassment
+            Examples of{"\n"}Sexual Harassment
           </Text>
         </TouchableOpacity>
 

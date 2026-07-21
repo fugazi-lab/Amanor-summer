@@ -72,7 +72,7 @@ export default function EmotionalHelpScreen() {
             onPress={() => router.push("/(drawer)/")}
             activeOpacity={0.85}
           >
-            <Text style={styles.optionText}>Join The Suvivors{"\n"}Support Network</Text>
+            <Text style={styles.optionText}>Join the Survivors{"\n"}Support Network</Text>
           </TouchableOpacity>
 
           {/* A Meeting With A Therapy */}
@@ -81,7 +81,7 @@ export default function EmotionalHelpScreen() {
             onPress={() => router.push("/(drawer)/schedule-meeting")}
             activeOpacity={0.85}
           >
-            <Text style={styles.optionText}>A Meeting With A{"\n"}Therapy</Text>
+            <Text style={styles.optionText}>Book a meeting{"\n"}with a therapist</Text>
           </TouchableOpacity>
 
         </View>

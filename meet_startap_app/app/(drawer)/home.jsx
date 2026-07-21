@@ -59,7 +59,7 @@ const FEATURES = [
     params: {},
     icon: require("../../assets/icons/incident.png"),
     title: "Report An Incident",
-    desc: "File a complaint through AmanOr, to inform your compnay.",
+    desc: "File a complaint through AmanOr to inform your company.",
   },
   // {
   //   id: "flagged",
@@ -83,7 +83,7 @@ const FEATURES = [
     params: {},
     icon: require("../../assets/icons/recording.png"),
     title: "Set Up Recording",
-    desc: "Choose a trigger word to set up voice-activated recording",
+    desc: "Choose a trigger word to set up voice-triggered recording",
   },
   
 ];

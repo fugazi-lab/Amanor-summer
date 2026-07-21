@@ -51,7 +51,7 @@ export default function RolePickScreen() {
 
         {/* ── TITLE ── */}
         <View style={styles.titleSection}>
-          <Text style={styles.title}>What are{"\n"}you?</Text>
+          <Text style={styles.title}>Who are{"\n"}you?</Text>
           <View style={styles.rule} />
         </View>
 
@@ -64,7 +64,7 @@ export default function RolePickScreen() {
             onPress={() => router.replace("/auth")}
             activeOpacity={0.85}
           >
-            <Text style={styles.optionTitle}>A Women</Text>
+            <Text style={styles.optionTitle}>A Woman</Text>
             <Text style={styles.optionDesc}>Get Support And Document Evidence</Text>
           </TouchableOpacity>
 
