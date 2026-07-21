@@ -119,14 +119,7 @@ export default function ScheduleMeetingScreen() {
     <SafeAreaView style={styles.root}>
       <View style={styles.container}>
 
-        {/* ── BULB ── */}
-        <View style={styles.topBulb}>
-          <Image
-            source={require("../../assets/bulblogo.png")}
-            style={styles.bulb}
-            resizeMode="contain"
-          />
-        </View>
+        
 
         {/* ── TITLE ── */}
         <Text style={styles.title}>Schedule A Meeting</Text>
