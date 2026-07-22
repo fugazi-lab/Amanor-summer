@@ -23,6 +23,7 @@ export default function DrawerLayout() {
         screenOptions={{
           drawerActiveTintColor: Colors[colorScheme ?? "light"].tint,
           headerShown: false,
+          swipeEnabled: false,
         }}
       >
         <Drawer.Screen

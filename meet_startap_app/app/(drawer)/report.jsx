@@ -91,6 +91,10 @@ export default function ReportScreen() {
         </TouchableOpacity>
 
       </View>
+
+      <TouchableOpacity style={styles.backBtn} onPress={() => router.replace("/(drawer)/home")}>
+        <Text style={styles.backBtnText}>{"< Back"}</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -123,4 +127,6 @@ const styles = StyleSheet.create({
     fontFamily: "Ledger_400Regular",
     fontSize: 12.5, color: C.muted, lineHeight: 19,
   },
+  backBtn: { backgroundColor: C.burgundy, borderRadius: 40, paddingVertical: 18, alignItems: "center", marginHorizontal: 28, marginBottom: 16, shadowColor: C.burgundy, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 4 },
+  backBtnText: { fontFamily: "Ledger_400Regular", fontSize: 20, color: C.white, letterSpacing: 0.5 },
 });

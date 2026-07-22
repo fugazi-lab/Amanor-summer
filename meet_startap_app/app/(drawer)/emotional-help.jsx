@@ -86,6 +86,10 @@ export default function EmotionalHelpScreen() {
 
         </View>
 
+        <TouchableOpacity style={styles.backLink} onPress={() => router.replace("/(drawer)/home")}>
+          <Text style={styles.backLinkText}>{"< Back"}</Text>
+        </TouchableOpacity>
+
       </View>
     </SafeAreaView>
   );
@@ -162,4 +166,6 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     letterSpacing: 0.3,
   },
+  backLink: { backgroundColor: C.burgundy, borderRadius: 40, paddingVertical: 18, alignItems: "center", marginBottom: 16, shadowColor: C.burgundy, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 4 },
+  backLinkText: { fontFamily: "Ledger_400Regular", fontSize: 20, color: C.white, letterSpacing: 0.5 },
 });

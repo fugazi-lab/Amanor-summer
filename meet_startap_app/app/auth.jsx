@@ -246,6 +246,10 @@ export default function AuthScreen() {
 
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <TouchableOpacity style={styles.backBtn} onPress={() => router.replace("/(drawer)/role-pick")}>
+        <Text style={styles.backBtnText}>{"< Back"}</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -346,4 +350,6 @@ const styles = StyleSheet.create({
     height: 40,
     opacity: 0.5,
   },
+  backBtn: { backgroundColor: C.burgundy, borderRadius: 40, paddingVertical: 18, alignItems: "center", marginHorizontal: 36, marginBottom: 16, shadowColor: C.burgundy, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 4 },
+  backBtnText: { fontFamily: "Ledger_400Regular", fontSize: 20, color: C.white, letterSpacing: 0.5 },
 });

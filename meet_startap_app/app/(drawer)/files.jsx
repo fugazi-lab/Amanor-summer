@@ -18,7 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio, ResizeMode, Video } from "expo-av";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -220,6 +220,7 @@ function VideoRow({ file, onDelete }) {
 
 // ── MAIN SCREEN ──────────────────────────────────────────────
 export default function FilesScreen() {
+  const router = useRouter();
   const { username } = useLocalSearchParams();
   const user = username || "anon";
 
@@ -424,6 +425,10 @@ export default function FilesScreen() {
         )}
       </ScrollView>
 
+      <TouchableOpacity style={styles.backLink} onPress={() => router.replace("/(drawer)/home")}>
+        <Text style={styles.backLinkText}>{"< Back"}</Text>
+      </TouchableOpacity>
+
       {/* ── MODAL ── */}
       <Modal
         animationType="fade"
@@ -519,6 +524,8 @@ const styles = StyleSheet.create({
   headerSub: { fontSize: 12, color: C.brown, fontStyle: "italic" },
 
   scroll: { padding: 18, paddingBottom: 48 },
+  backLink: { backgroundColor: C.burgundy, borderRadius: 40, paddingVertical: 18, alignItems: "center", marginHorizontal: 18, marginBottom: 16, shadowColor: C.burgundy, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 4 },
+  backLinkText: { fontFamily: "Ledger_400Regular", fontSize: 20, color: "#fff", letterSpacing: 0.5 },
 
   uploadButton: {
     backgroundColor: C.burgundy, padding: 18,

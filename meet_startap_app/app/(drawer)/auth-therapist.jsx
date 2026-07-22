@@ -301,11 +301,6 @@ export default function TherapistAuthScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* ── BACK ── */}
-          <TouchableOpacity style={styles.backLink} onPress={() => router.back()}>
-            <Text style={styles.backLinkText}>{"< Back"}</Text>
-          </TouchableOpacity>
-
           <View style={{ flex: 1, minHeight: 60 }} />
 
           {/* ── LOGO ── */}
@@ -319,6 +314,10 @@ export default function TherapistAuthScreen() {
 
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <TouchableOpacity style={styles.backLink} onPress={() => router.replace("/(drawer)/role-pick")}>
+        <Text style={styles.backLinkText}>{"< Back"}</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -442,13 +441,23 @@ const styles = StyleSheet.create({
   },
 
   backLink: {
+    backgroundColor: C.burgundy,
+    borderRadius: 40,
+    paddingVertical: 18,
     alignItems: "center",
-    marginTop: 16,
+    marginHorizontal: 36,
+    marginBottom: 16,
+    shadowColor: C.burgundy,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
   },
   backLinkText: {
     fontFamily: "Ledger_400Regular",
-    fontSize: 14,
-    color: C.muted,
+    fontSize: 20,
+    color: C.white,
+    letterSpacing: 0.5,
   },
 
   bottomLogoWrap: {

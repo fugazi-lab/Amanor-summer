@@ -81,7 +81,7 @@ export default function LegalIntroScreen() {
 
         <View style={{ height: 16 }} />
 
-        {/* ── BUTTON 2: Examples of Sexual Harassment ── */}
+        {/* ── BUTTON 2: Examples of Sexual Harassment ──
         <TouchableOpacity
           style={[styles.btn, { backgroundColor: C.btnPink }]}
           onPress={() => router.push("/(drawer)/legal-what")}
@@ -92,7 +92,7 @@ export default function LegalIntroScreen() {
           </Text>
         </TouchableOpacity>
 
-        <View style={{ height: 16 }} />
+        <View style={{ height: 16 }} /> */}
 
         {/* ── BUTTON 3: Your Rights & Legal Options ── */}
         <TouchableOpacity
@@ -117,6 +117,10 @@ export default function LegalIntroScreen() {
         </TouchableOpacity> */}
 
       </View>
+
+      <TouchableOpacity style={styles.backLink} onPress={() => router.replace("/(drawer)/home")}>
+        <Text style={styles.backLinkText}>{"< Back"}</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -197,4 +201,6 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "center",
   },
+  backLink: { backgroundColor: C.burgundy, borderRadius: 40, paddingVertical: 18, alignItems: "center", marginHorizontal: 28, marginBottom: 16, shadowColor: C.burgundy, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 4 },
+  backLinkText: { fontFamily: "Ledger_400Regular", fontSize: 20, color: C.white, letterSpacing: 0.5 },
 });

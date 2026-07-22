@@ -169,6 +169,10 @@ export default function HomeScreen() {
         )}
       </ScrollView>
 
+      <TouchableOpacity style={styles.backBtn} onPress={() => router.replace("/(drawer)/home")}>
+        <Text style={styles.backBtnText}>{"< Back"}</Text>
+      </TouchableOpacity>
+
       <Modal
         animationType="fade"
         transparent={true}
@@ -238,6 +242,8 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
   scroll: { paddingHorizontal: 24, paddingTop: 20, paddingBottom: 40 },
+  backBtn: { backgroundColor: C.burgundy, borderRadius: 40, paddingVertical: 18, alignItems: "center", marginHorizontal: 24, marginBottom: 16, shadowColor: C.burgundy, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 4 },
+  backBtnText: { fontFamily: "Ledger_400Regular", fontSize: 20, color: C.white, letterSpacing: 0.5 },
   header: { marginBottom: 20 },
   bulb: { width: 40, height: 40, marginBottom: 12, opacity: 0.8 },
   title: {

@@ -91,20 +91,11 @@ export default function LegalWhatScreen() {
           ))}
         </View>
 
-        <View style={{ height: 36 }} />
-
-        {/* ── BACK BUTTON ── */}
-        <TouchableOpacity
-          style={styles.backBtn}
-          onPress={() => router.back()}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.backBtnText}>{"< Back"}</Text>
-        </TouchableOpacity>
-
-        <View style={{ height: 24 }} />
-
       </ScrollView>
+
+      <TouchableOpacity style={styles.backBtn} onPress={() => router.replace("/(drawer)/legal-intro")}>
+        <Text style={styles.backBtnText}>{"< Back"}</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -176,6 +167,8 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     paddingVertical: 18,
     alignItems: "center",
+    marginHorizontal: 28,
+    marginBottom: 16,
     shadowColor: C.burgundy,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,

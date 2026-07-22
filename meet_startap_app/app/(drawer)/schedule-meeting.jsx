@@ -179,6 +179,10 @@ export default function ScheduleMeetingScreen() {
           <Text style={styles.legendText}>session available</Text>
         </View>
 
+        <TouchableOpacity style={styles.backLink} onPress={() => router.replace("/(drawer)/emotional-help")}>
+          <Text style={styles.backLinkText}>{"< Back"}</Text>
+        </TouchableOpacity>
+
       </View>
 
       {/* ── MODAL ── */}
@@ -451,4 +455,6 @@ const styles = StyleSheet.create({
     fontFamily: "Ledger_400Regular",
     fontSize: 17, color: C.white, letterSpacing: 0.5,
   },
+  backLink: { backgroundColor: C.burgundy, borderRadius: 40, paddingVertical: 18, alignItems: "center", shadowColor: C.burgundy, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 4 },
+  backLinkText: { fontFamily: "Ledger_400Regular", fontSize: 20, color: C.white, letterSpacing: 0.5 },
 });
