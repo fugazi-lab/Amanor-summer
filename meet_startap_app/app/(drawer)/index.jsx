@@ -169,7 +169,7 @@ export default function HomeScreen() {
         )}
       </ScrollView>
 
-      <TouchableOpacity style={styles.backBtn} onPress={() => router.replace("/(drawer)/home")}>
+      <TouchableOpacity style={styles.backBtn} onPress={() => router.replace("/(drawer)/emotional-help")}>
         <Text style={styles.backBtnText}>{"< Back"}</Text>
       </TouchableOpacity>
 

@@ -17,6 +17,7 @@ import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
 import { Ledger_400Regular } from "@expo-google-fonts/ledger";
+import { useState } from "react";
 
 const C = {
   bg:       "#F5F0E4",
@@ -27,7 +28,7 @@ const C = {
   white:    "#ffffff",
 };
 
-const BULLETS = [
+const EXAMPLES = [
   "making sexual comments or jokes about a woman's body or appearance",
   "sending sexual messages or pictures",
   "touching someone without permission",
@@ -39,6 +40,7 @@ const BULLETS = [
 
 export default function LegalWhatScreen() {
   const router = useRouter();
+  const [example, setExample] = useState(0);
 
   const [fontsLoaded] = useFonts({
     OtomanopeeOne_400Regular,
@@ -70,25 +72,25 @@ export default function LegalWhatScreen() {
         showsVerticalScrollIndicator={false}
       >
 
-        {/* ── TITLE ── */}
-        <Text style={styles.title}>Workplace Sexual Harassment Definition</Text>
-
-        {/* ── DIVIDER ── */}
+        <Text style={styles.title}>What Is Workplace{"\n"}Sexual Harassment?</Text>
         <View style={styles.divider} />
 
-        {/* ── DEFINITION ── */}
-        <Text style={styles.definition}>
-          Sexual harassment is any unwanted behavior of a sexual nature that makes a person feel uncomfortable, unsafe, or humiliated it includes:
-        </Text>
+        <View style={styles.definitionCard}>
+          <Text style={styles.definitionTitle}>What Is Sexual Harassment?</Text>
+        </View>
 
-        {/* ── BULLET POINTS ── */}
-        <View style={styles.bulletList}>
-          {BULLETS.map((item, index) => (
-            <View key={index} style={styles.bulletRow}>
-              <Text style={styles.bullet}>•</Text>
-              <Text style={styles.bulletText}>{item}</Text>
-            </View>
-          ))}
+        <Text style={styles.examplesTitle}>Examples Of Sexual Harassment:</Text>
+
+        <View style={styles.carousel}>
+          <TouchableOpacity style={styles.sideCard} onPress={() => setExample((example - 1 + EXAMPLES.length) % EXAMPLES.length)}>
+            <Text style={styles.arrow}>‹</Text>
+          </TouchableOpacity>
+          <View style={styles.exampleCard}>
+            <Text style={styles.exampleText}>{EXAMPLES[example]}</Text>
+          </View>
+          <TouchableOpacity style={styles.sideCard} onPress={() => setExample((example + 1) % EXAMPLES.length)}>
+            <Text style={styles.arrow}>›</Text>
+          </TouchableOpacity>
         </View>
 
       </ScrollView>
@@ -111,55 +113,91 @@ const styles = StyleSheet.create({
   bulb: { width: 36, height: 36, opacity: 0.6 },
 
   scroll: {
-    paddingHorizontal: 28,
-    paddingTop: 8,
-    paddingBottom: 16,
+    paddingHorizontal: 20,
+    paddingTop: 48,
+    paddingBottom: 32,
   },
 
   title: {
     fontFamily: "OtomanopeeOne_400Regular",
-    fontSize: 34,
+    fontSize: 32,
     color: C.burgundy,
     textAlign: "center",
-    lineHeight: 44,
-    marginBottom: 18,
+    lineHeight: 42,
+    marginBottom: 10,
     letterSpacing: 0.2,
   },
 
   divider: {
     height: 1,
-    backgroundColor: C.divider,
-    marginBottom: 20,
+    backgroundColor: C.muted,
+    marginBottom: 34,
   },
-
+  definitionCard: {
+    minHeight: 140,
+    backgroundColor: "#D98FA3",
+    borderRadius: 24,
+    padding: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 6,
+  },
+  definitionTitle: {
+    fontFamily: "Ledger_400Regular",
+    fontSize: 22,
+    color: C.burgundy,
+    textAlign: "center",
+    marginBottom: 8,
+  },
   definition: {
     fontFamily: "Ledger_400Regular",
     fontSize: 14,
-    color: C.text,
+    color: C.burgundy,
     textAlign: "center",
-    lineHeight: 23,
-    marginBottom: 24,
+    lineHeight: 22,
   },
-
-  bulletList: { gap: 14 },
-  bulletRow: {
+  examplesTitle: {
+    fontFamily: "Ledger_400Regular",
+    fontSize: 20,
+    color: C.muted,
+    textAlign: "center",
+    marginTop: 38,
+    marginBottom: 22,
+  },
+  carousel: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 10,
   },
-  bullet: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 16,
-    color: C.text,
-    lineHeight: 22,
-    marginTop: 1,
+  sideCard: {
+    width: 48,
+    height: 150,
+    borderRadius: 12,
+    backgroundColor: "#C49378",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  bulletText: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 14,
-    color: C.text,
-    lineHeight: 22,
+  exampleCard: {
     flex: 1,
+    minHeight: 190,
+    backgroundColor: "#D98FA3",
+    borderRadius: 24,
+    padding: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  exampleText: {
+    fontFamily: "Ledger_400Regular",
+    fontSize: 20,
+    color: C.burgundy,
+    lineHeight: 28,
+    textAlign: "center",
+  },
+  arrow: {
+    fontSize: 34,
+    color: C.white,
+    lineHeight: 38,
   },
 
   backBtn: {
