@@ -18,11 +18,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio, ResizeMode, Video } from "expo-av";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
+import { useFonts } from "expo-font";
+import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
+import { Ledger_400Regular } from "@expo-google-fonts/ledger";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -30,7 +34,7 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  Text,
+  Text as NativeText,
   TextInput,
   TouchableOpacity,
   View,
@@ -65,12 +69,14 @@ const writeIndex = async (list) => {
 
 // ── COLOURS ──────────────────────────────────────────────────
 const C = {
-  bg:       "#fffaeb",
-  brown:    "#b38e75",
-  dark:     "#6d4d40",
-  pink:     "#d395a2",
-  burgundy: "#8b2c3a",
+  bg:       "#F5F0E4",
+  brown:    "#9a8070",
+  dark:     "#2C1810",
+  pink:     "#D395A2",
+  burgundy: "#7a2035",
 };
+
+const Text = ({ style, ...props }) => <NativeText {...props} style={[{ fontFamily: "Ledger_400Regular" }, style]} />;
 
 // ── HELPERS ──────────────────────────────────────────────────
 const isAudio = (mime) => mime?.startsWith("audio/");
@@ -154,7 +160,7 @@ function AudioRow({ file, onDelete }) {
 
   return (
     <View style={styles.fileCard}>
-      <View style={[styles.fileIconBox, { backgroundColor: "#e8f4fd" }]}>
+      <View style={[styles.fileIconBox, { backgroundColor: "#F2DDE2" }]}>
         <Text style={styles.fileEmoji}>🎵</Text>
       </View>
       <View style={styles.fileInfo}>
@@ -197,7 +203,7 @@ function VideoRow({ file, onDelete }) {
         </View>
       ) : (
         <>
-          <View style={[styles.fileIconBox, { backgroundColor: "#f0e8ff" }]}>
+          <View style={[styles.fileIconBox, { backgroundColor: "#F2DDE2" }]}>
             <Text style={styles.fileEmoji}>🎬</Text>
           </View>
           <View style={styles.fileInfo}>
@@ -220,6 +226,7 @@ function VideoRow({ file, onDelete }) {
 
 // ── MAIN SCREEN ──────────────────────────────────────────────
 export default function FilesScreen() {
+  useFonts({ OtomanopeeOne_400Regular, Ledger_400Regular });
   const router = useRouter();
   const { username } = useLocalSearchParams();
   const user = username || "anon";
@@ -240,10 +247,7 @@ export default function FilesScreen() {
   const fetchFiles = async () => {
     try {
       const all = await readIndex();
-      const mine = all
-        .filter((f) => f.username === user)
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      setFiles(mine);
+      setFiles(all.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     } catch (err) {
       console.error("Fetch error:", getErrMsg(err));
       Alert.alert("Error", "Couldn't load your files.\n" + getErrMsg(err));
@@ -363,10 +367,14 @@ export default function FilesScreen() {
   return (
     <SafeAreaView style={styles.root}>
 
+      <View style={styles.topBulb}>
+        <Image source={require("../../assets/bulblogo.png")} style={styles.cornerLogo} resizeMode="contain" />
+      </View>
+
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Your Media 🎧</Text>
+        <Text style={styles.headerTitle}>Saved Evidence</Text>
         <Text style={styles.headerSub}>
-          audio and video files — stored only on this device, {user}.
+          Audio and video files stored safely on this device, {user}.
         </Text>
       </View>
 
@@ -399,7 +407,7 @@ export default function FilesScreen() {
         ) : files.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyEmoji}>📭</Text>
-            <Text style={styles.emptyText}>no files yet. add something!</Text>
+            <Text style={styles.emptyText}>No files yet. Add audio or video to get started.</Text>
           </View>
         ) : (
           files.map((file) => {
@@ -513,15 +521,16 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
 
   header: {
-    backgroundColor: C.dark,
-    paddingVertical: 22, paddingHorizontal: 20,
-    borderBottomWidth: 3, borderBottomColor: C.burgundy,
+    paddingHorizontal: 28, paddingTop: 24, paddingBottom: 18,
   },
+  topBulb: { paddingHorizontal: 24, paddingTop: 16, alignItems: "flex-start" },
+  cornerLogo: { width: 36, height: 36, opacity: 0.6 },
   headerTitle: {
-    fontSize: 26, fontWeight: "900", color: C.bg,
-    letterSpacing: -0.5, marginBottom: 6,
+    fontFamily: "OtomanopeeOne_400Regular",
+    fontSize: 38, lineHeight: 46, color: C.burgundy,
+    marginBottom: 8,
   },
-  headerSub: { fontSize: 12, color: C.brown, fontStyle: "italic" },
+  headerSub: { fontSize: 13, color: C.brown, lineHeight: 20 },
 
   scroll: { padding: 18, paddingBottom: 48 },
   backLink: { backgroundColor: C.burgundy, borderRadius: 40, paddingVertical: 18, alignItems: "center", marginHorizontal: 18, marginBottom: 16, shadowColor: C.burgundy, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 4 },
@@ -529,17 +538,17 @@ const styles = StyleSheet.create({
 
   uploadButton: {
     backgroundColor: C.burgundy, padding: 18,
-    borderRadius: 14, alignItems: "center", marginBottom: 26,
-    shadowColor: C.dark, shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2, shadowRadius: 8, elevation: 4,
+    borderRadius: 40, alignItems: "center", marginBottom: 26,
+    shadowColor: C.burgundy, shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25, shadowRadius: 10, elevation: 4,
   },
   uploadButtonDisabled: { opacity: 0.6 },
-  uploadButtonText: { color: "#fff", fontSize: 16, fontWeight: "900", letterSpacing: 0.3 },
+  uploadButtonText: { fontSize: 18, color: "#fff", letterSpacing: 0.5 },
   uploadingRow: { flexDirection: "row", alignItems: "center" },
 
   sectionLabel: {
-    fontSize: 11, fontWeight: "700", color: C.brown,
-    textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 12,
+    fontFamily: "OtomanopeeOne_400Regular",
+    fontSize: 16, color: C.burgundy, marginBottom: 12,
   },
 
   emptyState: { alignItems: "center", marginTop: 32 },
@@ -548,8 +557,8 @@ const styles = StyleSheet.create({
 
   fileCard: {
     flexDirection: "row", alignItems: "center", flexWrap: "wrap",
-    backgroundColor: "#fff", borderRadius: 14, padding: 14, marginBottom: 10,
-    borderLeftWidth: 4, borderLeftColor: C.pink,
+    backgroundColor: "#fff", borderRadius: 16, padding: 14, marginBottom: 12,
+    borderWidth: 1, borderColor: "#E4D8CC",
     shadowColor: C.dark, shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.07, shadowRadius: 6, elevation: 2,
   },
@@ -560,7 +569,7 @@ const styles = StyleSheet.create({
   },
   fileEmoji: { fontSize: 22 },
   fileInfo: { flex: 1 },
-  fileName: { fontSize: 14, fontWeight: "700", color: C.dark, marginBottom: 2 },
+  fileName: { fontFamily: "OtomanopeeOne_400Regular", fontSize: 14, color: C.dark, marginBottom: 2 },
   fileCompany: { fontSize: 12, color: C.burgundy, fontWeight: "600", marginBottom: 2 },
   fileDesc: { fontSize: 12, color: "#6b5047", lineHeight: 17, marginBottom: 3 },
   fileMeta: { fontSize: 11, color: C.brown, fontStyle: "italic" },
@@ -595,7 +604,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25, shadowRadius: 20, elevation: 12,
     borderTopWidth: 4, borderTopColor: C.pink,
   },
-  modalTitle: { fontSize: 20, fontWeight: "900", color: C.dark, marginBottom: 16 },
+  modalTitle: { fontFamily: "OtomanopeeOne_400Regular", fontSize: 22, color: C.burgundy, marginBottom: 16 },
 
   filePreview: {
     flexDirection: "row", alignItems: "center",
@@ -610,6 +619,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6,
   },
   input: {
+    fontFamily: "Ledger_400Regular",
     borderWidth: 1.5, borderColor: C.brown, backgroundColor: "#fff",
     borderRadius: 10, padding: 13, marginBottom: 14,
     color: C.dark, fontSize: 15,
@@ -617,7 +627,7 @@ const styles = StyleSheet.create({
   textArea: { height: 90, textAlignVertical: "top" },
 
   modalButtons: { flexDirection: "row", gap: 12, marginTop: 4 },
-  modalBtn: { flex: 1, padding: 15, borderRadius: 12, alignItems: "center" },
+  modalBtn: { flex: 1, padding: 15, borderRadius: 40, alignItems: "center" },
   cancelBtn: { backgroundColor: C.dark },
   uploadBtn: { backgroundColor: C.pink },
   modalBtnText: { color: "#fff", fontSize: 15 },

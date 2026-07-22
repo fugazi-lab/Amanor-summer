@@ -17,7 +17,7 @@ import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
 import { Ledger_400Regular } from "@expo-google-fonts/ledger";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 const C = {
   bg:       "#F5F0E4",
@@ -35,12 +35,16 @@ const EXAMPLES = [
   "repeatedly asking for dates or sexual favors after the person said no",
   "threatening someone's job or promotion unless they agree to sexual behavior",
   "creating a sexual or uncomfortable environment at work",
-  "even one serious incident can be considered sexual harassment.",
+  // "even one serious incident can be considered sexual harassment.",
 ];
 
 export default function LegalWhatScreen() {
   const router = useRouter();
   const [example, setExample] = useState(0);
+  const [definitionOpen, setDefinitionOpen] = useState(false);
+  const swipeX = useRef(0);
+  const previous = (example - 1 + EXAMPLES.length) % EXAMPLES.length;
+  const next = (example + 1) % EXAMPLES.length;
 
   const [fontsLoaded] = useFonts({
     OtomanopeeOne_400Regular,
@@ -75,22 +79,47 @@ export default function LegalWhatScreen() {
         <Text style={styles.title}>What Is Workplace{"\n"}Sexual Harassment?</Text>
         <View style={styles.divider} />
 
-        <View style={styles.definitionCard}>
-          <Text style={styles.definitionTitle}>What Is Sexual Harassment?</Text>
-        </View>
+        <TouchableOpacity
+          style={[styles.definitionCard, definitionOpen && styles.definitionCardOpen]}
+          activeOpacity={1}
+          onPress={() => setDefinitionOpen(!definitionOpen)}
+        >
+          {definitionOpen ? (
+            <>
+              <View style={styles.peel} />
+              <Text style={styles.definition}>
+                Sexual harassment is any unwanted behavior of a sexual nature that makes a person feel uncomfortable, unsafe, or humiliated
+              </Text>
+            </>
+          ) : (
+            <Text style={styles.definitionTitle}>What Is Sexual Harassment?</Text>
+          )}
+        </TouchableOpacity>
+        <Text style={styles.holdHint}>Tap to switch</Text>
 
         <Text style={styles.examplesTitle}>Examples Of Sexual Harassment:</Text>
 
-        <View style={styles.carousel}>
-          <TouchableOpacity style={styles.sideCard} onPress={() => setExample((example - 1 + EXAMPLES.length) % EXAMPLES.length)}>
+        <View
+          style={styles.carousel}
+          onTouchStart={({ nativeEvent }) => { swipeX.current = nativeEvent.pageX; }}
+          onTouchEnd={({ nativeEvent }) => {
+            const distance = nativeEvent.pageX - swipeX.current;
+            if (distance > 40) setExample(previous);
+            if (distance < -40) setExample(next);
+          }}
+        >
+          <TouchableOpacity style={[styles.sideCard, { backgroundColor: previous % 2 ? "#C49378" : "#D98FA3" }]} onPress={() => setExample(previous)}>
             <Text style={styles.arrow}>‹</Text>
           </TouchableOpacity>
-          <View style={styles.exampleCard}>
+          <View style={[styles.exampleCard, { backgroundColor: example % 2 ? "#C49378" : "#D98FA3" }]}>
             <Text style={styles.exampleText}>{EXAMPLES[example]}</Text>
           </View>
-          <TouchableOpacity style={styles.sideCard} onPress={() => setExample((example + 1) % EXAMPLES.length)}>
+          <TouchableOpacity style={[styles.sideCard, { backgroundColor: next % 2 ? "#C49378" : "#D98FA3" }]} onPress={() => setExample(next)}>
             <Text style={styles.arrow}>›</Text>
           </TouchableOpacity>
+        </View>
+        <View style={styles.dots}>
+          {EXAMPLES.map((_, index) => <View key={index} style={[styles.dot, index === example && styles.dotActive]} />)}
         </View>
 
       </ScrollView>
@@ -141,6 +170,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginHorizontal: 6,
+    overflow: "hidden",
+  },
+  definitionCardOpen: { backgroundColor: "#C49378" },
+  peel: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    width: 54,
+    height: 54,
+    backgroundColor: "#D98FA3",
+    borderBottomLeftRadius: 54,
   },
   definitionTitle: {
     fontFamily: "Ledger_400Regular",
@@ -156,6 +196,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 22,
   },
+  holdHint: {
+    fontFamily: "Ledger_400Regular",
+    fontSize: 12,
+    color: C.muted,
+    textAlign: "center",
+    marginTop: 8,
+  },
   examplesTitle: {
     fontFamily: "Ledger_400Regular",
     fontSize: 20,
@@ -164,24 +211,11 @@ const styles = StyleSheet.create({
     marginTop: 38,
     marginBottom: 22,
   },
-  carousel: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-  },
-  sideCard: {
-    width: 48,
-    height: 150,
-    borderRadius: 12,
-    backgroundColor: "#C49378",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  carousel: { flexDirection: "row", alignItems: "center", gap: 8 },
+  sideCard: { width: 48, height: 150, borderRadius: 14, alignItems: "center", justifyContent: "center" },
   exampleCard: {
     flex: 1,
     minHeight: 190,
-    backgroundColor: "#D98FA3",
     borderRadius: 24,
     padding: 24,
     alignItems: "center",
@@ -194,11 +228,10 @@ const styles = StyleSheet.create({
     lineHeight: 28,
     textAlign: "center",
   },
-  arrow: {
-    fontSize: 34,
-    color: C.white,
-    lineHeight: 38,
-  },
+  arrow: { fontSize: 36, color: C.white, lineHeight: 38 },
+  dots: { flexDirection: "row", justifyContent: "center", gap: 6, marginTop: 14 },
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.divider },
+  dotActive: { width: 16, backgroundColor: C.burgundy },
 
   backBtn: {
     backgroundColor: C.burgundy,
