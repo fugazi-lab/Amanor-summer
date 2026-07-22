@@ -298,12 +298,12 @@ export default function ReportFormScreen() {
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.backLink} onPress={() => router.back()}>
-          <Text style={styles.backLinkText}>{"< Back"}</Text>
-        </TouchableOpacity>
-
         <View style={{ height: 24 }} />
       </ScrollView>
+
+      <TouchableOpacity style={styles.backLink} onPress={() => router.replace({ pathname: "/(drawer)/report-pick", params: { mode } })}>
+        <Text style={styles.backLinkText}>{"< Back"}</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -367,9 +367,9 @@ const styles = StyleSheet.create({
     fontSize: 22, color: C.white, letterSpacing: 1,
   },
 
-  backLink: { alignItems: "center", marginTop: 18 },
+  backLink: { backgroundColor: C.burgundy, borderRadius: 40, paddingVertical: 18, alignItems: "center", marginHorizontal: 24, marginBottom: 16, shadowColor: C.burgundy, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 4 },
   backLinkText: {
-    fontFamily: "Ledger_400Regular", fontSize: 15, color: C.muted,
+    fontFamily: "Ledger_400Regular", fontSize: 20, color: C.white, letterSpacing: 0.5,
   },
 
   // success screen

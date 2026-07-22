@@ -159,6 +159,10 @@ export default function HomeScreen() {
           />
         </View>
 
+        <TouchableOpacity style={styles.logoutBtn} onPress={() => router.replace("/welcome")} activeOpacity={0.8}>
+          <Text style={styles.logoutText}>Log out</Text>
+        </TouchableOpacity>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -174,6 +178,12 @@ const styles = StyleSheet.create({
     paddingTop: 32,
     paddingBottom: 40,
   },
+  logoutBtn: {
+    alignSelf: "flex-end", marginTop: 8,
+    backgroundColor: C.burgundy, borderRadius: 18,
+    paddingVertical: 7, paddingHorizontal: 12,
+  },
+  logoutText: { fontFamily: "Ledger_400Regular", fontSize: 12, color: "#fff" },
 
   // brand header
   brandRow: {

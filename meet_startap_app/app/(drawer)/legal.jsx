@@ -17,6 +17,7 @@ import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
 import { Ledger_400Regular } from "@expo-google-fonts/ledger";
+import { useRef, useState } from "react";
 
 const C = {
   bg:       "#F5F0E4",
@@ -38,6 +39,11 @@ const BULLETS = [
 
 export default function LegalScreen() {
   const router = useRouter();
+  const [rightsOpen, setRightsOpen] = useState(false);
+  const [right, setRight] = useState(0);
+  const swipeX = useRef(0);
+  const previous = (right - 1 + BULLETS.length) % BULLETS.length;
+  const next = (right + 1) % BULLETS.length;
 
   const [fontsLoaded] = useFonts({
     OtomanopeeOne_400Regular,
@@ -72,47 +78,57 @@ export default function LegalScreen() {
         {/* ── TITLE ── */}
         <Text style={styles.title}>Your Rights</Text>
 
-        {/* ── LAW OVERVIEW ── */}
-        <Text style={styles.overviewText}>
-          Sexual Harassment Law In Israel:{"\n"}
-          Sexual Harassment Is Illegal Under The Prevention Of Sexual Harassment Law (Israel).
-        </Text>
-
-        <Text style={styles.overviewText}>
-          The Law Protects People In Workplaces, Schools, The Military, And Public Places.{"\n"}
-          Sexual Harassment Can Be Both A Criminal Offense (Police Can Punish The Offender) And A Civil Violation (The Victim Can Sue For Compensation).
-        </Text>
+        <TouchableOpacity
+          style={[styles.rightsCard, rightsOpen && styles.rightsCardOpen]}
+          activeOpacity={1}
+          onPress={() => setRightsOpen(!rightsOpen)}
+        >
+          {rightsOpen ? (
+            <>
+              <View style={styles.peel} />
+              <Text style={styles.overviewText}>
+                Sexual harassment is illegal under Israel&apos;s Prevention of Sexual Harassment Law. The law protects people in workplaces, schools, the military, and public places.
+              </Text>
+            </>
+          ) : (
+            <Text style={styles.rightsCardTitle}>What Are Your Rights?</Text>
+          )}
+        </TouchableOpacity>
+        <Text style={styles.holdHint}>Tap to switch</Text>
 
         {/* ── DIVIDER ── */}
         <View style={styles.divider} />
 
-        {/* ── YOUR RIGHTS SUBHEADING ── */}
         <Text style={styles.subheading}>Your Rights</Text>
 
-        {/* ── BULLET POINTS ── */}
-        <View style={styles.bulletList}>
-          {BULLETS.map((item, index) => (
-            <View key={index} style={styles.bulletRow}>
-              <Text style={styles.bullet}>•</Text>
-              <Text style={styles.bulletText}>{item}</Text>
-            </View>
-          ))}
+        <View
+          style={styles.carousel}
+          onTouchStart={({ nativeEvent }) => { swipeX.current = nativeEvent.pageX; }}
+          onTouchEnd={({ nativeEvent }) => {
+            const distance = nativeEvent.pageX - swipeX.current;
+            if (distance > 40) setRight(previous);
+            if (distance < -40) setRight(next);
+          }}
+        >
+          <TouchableOpacity style={[styles.sideCard, { backgroundColor: previous % 2 ? "#C49378" : "#D98FA3" }]} onPress={() => setRight(previous)}>
+            <Text style={styles.arrow}>‹</Text>
+          </TouchableOpacity>
+          <View style={[styles.rightCard, { backgroundColor: right % 2 ? "#C49378" : "#D98FA3" }]}>
+            <Text style={styles.rightText}>{BULLETS[right]}</Text>
+          </View>
+          <TouchableOpacity style={[styles.sideCard, { backgroundColor: next % 2 ? "#C49378" : "#D98FA3" }]} onPress={() => setRight(next)}>
+            <Text style={styles.arrow}>›</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.dots}>
+          {BULLETS.map((_, index) => <View key={index} style={[styles.dot, index === right && styles.dotActive]} />)}
         </View>
 
-        <View style={{ height: 32 }} />
-
-        {/* ── BACK BUTTON ── */}
-        <TouchableOpacity
-          style={styles.backBtn}
-          onPress={() => router.back()}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.backBtnText}>{"< Back"}</Text>
-        </TouchableOpacity>
-
-        <View style={{ height: 24 }} />
-
       </ScrollView>
+
+      <TouchableOpacity style={styles.backBtn} onPress={() => router.replace("/(drawer)/legal-intro")}>
+        <Text style={styles.backBtnText}>{"< Back"}</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -150,14 +166,44 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
 
-  // overview paragraphs
+  rightsCard: {
+    minHeight: 140,
+    backgroundColor: "#D98FA3",
+    borderRadius: 24,
+    padding: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  rightsCardOpen: { backgroundColor: "#C49378" },
+  rightsCardTitle: {
+    fontFamily: "Ledger_400Regular",
+    fontSize: 22,
+    color: C.burgundy,
+    textAlign: "center",
+  },
+  peel: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    width: 54,
+    height: 54,
+    backgroundColor: "#D98FA3",
+    borderBottomLeftRadius: 54,
+  },
   overviewText: {
     fontFamily: "Ledger_400Regular",
     fontSize: 14,
     color: C.text,
     textAlign: "center",
     lineHeight: 22,
-    marginBottom: 16,
+  },
+  holdHint: {
+    fontFamily: "Ledger_400Regular",
+    fontSize: 12,
+    color: C.muted,
+    textAlign: "center",
+    marginTop: 8,
   },
 
   // divider
@@ -176,29 +222,14 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
-  // bullet list
-  bulletList: {
-    gap: 12,
-  },
-  bulletRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 8,
-  },
-  bullet: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 16,
-    color: C.text,
-    lineHeight: 22,
-    marginTop: 1,
-  },
-  bulletText: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 14,
-    color: C.text,
-    lineHeight: 22,
-    flex: 1,
-  },
+  carousel: { flexDirection: "row", alignItems: "center", gap: 8 },
+  sideCard: { width: 48, height: 150, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  rightCard: { flex: 1, minHeight: 190, borderRadius: 24, padding: 22, alignItems: "center", justifyContent: "center" },
+  rightText: { fontFamily: "Ledger_400Regular", fontSize: 17, color: C.burgundy, lineHeight: 25, textAlign: "center" },
+  arrow: { fontSize: 36, color: C.white, lineHeight: 38 },
+  dots: { flexDirection: "row", justifyContent: "center", gap: 6, marginTop: 14 },
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.divider },
+  dotActive: { width: 16, backgroundColor: C.burgundy },
 
   // back button
   backBtn: {
@@ -206,6 +237,8 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     paddingVertical: 18,
     alignItems: "center",
+    marginHorizontal: 28,
+    marginBottom: 16,
     shadowColor: C.burgundy,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,

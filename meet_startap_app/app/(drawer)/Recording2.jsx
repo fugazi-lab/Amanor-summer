@@ -25,6 +25,9 @@
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
+import { useFonts } from "expo-font";
+import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
+import { Ledger_400Regular } from "@expo-google-fonts/ledger";
 import * as FileSystem from "expo-file-system/legacy";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -37,12 +40,14 @@ import {
   ScrollView,
   StatusBar,
   StyleSheet,
-  Text,
+  Text as NativeText,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { WebView } from "react-native-webview";
+
+const Text = ({ style, ...props }) => <NativeText {...props} style={[{ fontFamily: "Ledger_400Regular" }, style]} />;
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
 const COLORS = {
@@ -424,6 +429,8 @@ const TEST_LISTEN_TIMEOUT_MS = 6000;
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function RecordingSetupScreen() {
+  useFonts({ OtomanopeeOne_400Regular, Ledger_400Regular });
+  const router = useRouter();
   const { username } = useLocalSearchParams();
   const user = username || "anon";
 
@@ -796,9 +803,7 @@ export default function RecordingSetupScreen() {
                 ⚠️ Speech recognition isn't supported on this device.
               </Text>
             ) : recognized === null && testStatus === "idle" ? (
-              <Text style={styles.feedbackMuted}>
-                ✅ Trigger word recognized {"  "}/ {"  "}❌ Didn't catch that, try again!
-              </Text>
+              null
             ) : recognized === true ? (
               <Text style={styles.feedbackOk}>✅ Trigger word recognized</Text>
             ) : recognized === false && isTestRecording ? (
@@ -830,6 +835,10 @@ export default function RecordingSetupScreen() {
           <Text style={styles.setupBtnText}>{setUpButtonLabel}</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <TouchableOpacity style={styles.backBtn} onPress={() => router.replace("/(drawer)/home")}>
+        <Text style={styles.backBtnText}>{"< Back"}</Text>
+      </TouchableOpacity>
 
       {/* ── Triggered-recording popup ── */}
       <Modal animationType="fade" transparent visible={modalVisible} onRequestClose={() => {}}>
@@ -903,7 +912,7 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: COLORS.maroon,
     textAlign: "center",
-    fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
+    fontFamily: "OtomanopeeOne_400Regular",
     lineHeight: 44,
     letterSpacing: 0.3,
     marginBottom: 18,
@@ -1070,8 +1079,10 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "600",
     letterSpacing: 0.5,
-    fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
+    fontFamily: "Ledger_400Regular",
   },
+  backBtn: { backgroundColor: COLORS.maroon, borderRadius: 40, paddingVertical: 18, alignItems: "center", marginHorizontal: 24, marginBottom: 16, shadowColor: COLORS.maroon, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 4 },
+  backBtnText: { fontFamily: "Ledger_400Regular", fontSize: 20, color: COLORS.white, letterSpacing: 0.5 },
 
   // Triggered-recording popup
   modalOverlay: {
