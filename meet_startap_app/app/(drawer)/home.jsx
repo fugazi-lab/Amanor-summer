@@ -106,7 +106,7 @@ export default function HomeScreen() {
             <Text style={styles.tagline}>You report, we support.</Text>
           </View>
 
-          <TouchableOpacity onPress={handleProfilePress} style={styles.profileCircle}>
+          <TouchableOpacity onPress={() => go("/(drawer)/Profile")} style={styles.profileCircle}>
             <Text style={styles.profileIcon}>👤</Text>
           </TouchableOpacity>
         </View>
@@ -238,7 +238,7 @@ export default function HomeScreen() {
           <Text style={styles.navLabel}>Resources</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navTab} onPress={handleProfilePress} activeOpacity={0.7}>
+        <TouchableOpacity style={styles.navTab} onPress={() => go("/(drawer)/Profile")} activeOpacity={0.7}>
           <Text style={styles.navIcon}>👤</Text>
           <Text style={styles.navLabel}>Profile</Text>
         </TouchableOpacity>
