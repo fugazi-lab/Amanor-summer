@@ -3,7 +3,7 @@
     Redesigned to match the new brand mockup:
     top bar (menu / brand / profile) → headline → two hero cards
     → "More Resources" divider → resource cards → bottom nav.
-    Laid out with flex (no ScrollView) so it fills exactly one screen.
+    Scrolls vertically when content needs additional height.
 
     Only wired to routes that are currently active in the app:
       Recording2 (Set Up Recording), emotional-help (Support),
@@ -22,32 +22,16 @@ import {
   ActivityIndicator,
   Alert,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 
-import { Dimensions } from "react-native";
+import { AMANOR } from "../../constants/amanor-theme";
 
-const SCREEN_HEIGHT = Dimensions.get("window").height;
-
-const C = {
-  bg:          "#FBF3EA",
-  text:        "#33201A",
-  muted:       "#8A7566",
-  rose:        "#C0455F",
-  roseSoft:    "#F6DCE0",
-  roseCircle:  "#F0C7CE",
-  tan:         "#F0E1D2",
-  tanCircle:   "#DCC0A4",
-  brown:       "#8B6F5C",
-  cardTan:     "#F1E7DA",
-  bannerBg:    "#F3D7DA",
-  white:       "#ffffff",
-  navBg:       "#F6EFE6",
-  divider:     "#D9C7B8",
-};
+const C = AMANOR.colors;
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -89,7 +73,11 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.root}>
-      <View style={styles.body}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.body}
+        showsVerticalScrollIndicator={false}
+      >
 
         {/* ── TOP BAR ── */}
         <View style={styles.topBar}>
@@ -112,7 +100,7 @@ export default function HomeScreen() {
         </View>
 
         {/* ── HEADLINE ── */}
-        <Text style={styles.headline} numberOfLines={2}>
+        <Text style={styles.headline}>
           You&apos;re not alone. We&apos;re here to support you.
         </Text>
 
@@ -124,14 +112,14 @@ export default function HomeScreen() {
             <View style={[styles.heroIconCircle, { backgroundColor: C.roseCircle }]}>
               <Text style={styles.heroIcon}>🎙️</Text>
             </View>
-            <Text style={styles.heroTitle} numberOfLines={1}>Record & Protect</Text>
-            <Text style={styles.heroDesc} numberOfLines={2}>Set a trigger word and record incidents securely.</Text>
+            <Text style={styles.heroTitle}>Record & Protect</Text>
+            <Text style={styles.heroDesc}>Set a trigger word and record incidents securely.</Text>
             <TouchableOpacity
               style={[styles.heroBtn, { backgroundColor: C.rose }]}
               onPress={() => go("/(drawer)/Recording2")}
               activeOpacity={0.85}
             >
-              <Text style={styles.heroBtnText} numberOfLines={1}>Set Up Recording</Text>
+              <Text style={styles.heroBtnText}>Set Up Recording</Text>
             </TouchableOpacity>
           </View>
 
@@ -140,14 +128,14 @@ export default function HomeScreen() {
             <View style={[styles.heroIconCircle, { backgroundColor: C.tanCircle }]}>
               <Text style={styles.heroIcon}>🫂</Text>
             </View>
-            <Text style={styles.heroTitle} numberOfLines={1}>Emotional Support</Text>
-            <Text style={styles.heroDesc} numberOfLines={2}>Talk to others who understand. You&apos;re not alone.</Text>
+            <Text style={styles.heroTitle}>Emotional Support</Text>
+            <Text style={styles.heroDesc}>Talk to others who understand. You&apos;re not alone.</Text>
             <TouchableOpacity
               style={[styles.heroBtn, { backgroundColor: C.brown }]}
               onPress={() => go("/(drawer)/emotional-help")}
               activeOpacity={0.85}
             >
-              <Text style={styles.heroBtnText} numberOfLines={1}>Join Support Network</Text>
+              <Text style={styles.heroBtnText}>Join Support Network</Text>
             </TouchableOpacity>
           </View>
 
@@ -169,8 +157,8 @@ export default function HomeScreen() {
             activeOpacity={0.85}
           >
             <Text style={styles.resourceIcon}>⚖️</Text>
-            <Text style={styles.resourceTitle} numberOfLines={2}>Legal Rights</Text>
-            <Text style={styles.resourceDesc} numberOfLines={2}>Learn your rights at work</Text>
+            <Text style={styles.resourceTitle}>Legal Rights</Text>
+            <Text style={styles.resourceDesc}>Learn your rights at work</Text>
             <Text style={styles.resourceArrow}>→</Text>
           </TouchableOpacity>
 
@@ -180,8 +168,8 @@ export default function HomeScreen() {
             activeOpacity={0.85}
           >
             <Text style={styles.resourceIcon}>🏢</Text>
-            <Text style={styles.resourceTitle} numberOfLines={2}>Report To Company</Text>
-            <Text style={styles.resourceDesc} numberOfLines={2}>File a complaint safely</Text>
+            <Text style={styles.resourceTitle}>Report To Company</Text>
+            <Text style={styles.resourceDesc}>File a complaint safely</Text>
             <Text style={styles.resourceArrow}>→</Text>
           </TouchableOpacity>
 
@@ -191,8 +179,8 @@ export default function HomeScreen() {
             activeOpacity={0.85}
           >
             <Text style={styles.resourceIcon}>🗂️</Text>
-            <Text style={styles.resourceTitle} numberOfLines={2}>Saved Evidence</Text>
-            <Text style={styles.resourceDesc} numberOfLines={2}>Access all your evidence</Text>
+            <Text style={styles.resourceTitle}>Saved Evidence</Text>
+            <Text style={styles.resourceDesc}>Access all your evidence</Text>
             <Text style={styles.resourceArrow}>→</Text>
           </TouchableOpacity>
 
@@ -206,13 +194,13 @@ export default function HomeScreen() {
         >
           <Text style={styles.bannerIcon}>🤲</Text>
           <View style={styles.bannerTextWrap}>
-            <Text style={styles.bannerTitle} numberOfLines={1}>Together, we create safer workplaces.</Text>
-            <Text style={styles.bannerSub} numberOfLines={1}>Your voice can protect others.</Text>
+            <Text style={styles.bannerTitle}>Together, we create safer workplaces.</Text>
+            <Text style={styles.bannerSub}>Your voice can protect others.</Text>
           </View>
           <Text style={styles.bannerArrow}>→</Text>
         </TouchableOpacity>
 
-      </View>
+      </ScrollView>
 
       {/* ── BOTTOM NAV ── */}
       <View style={styles.navBar}>
@@ -249,10 +237,12 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
+  scrollView: { flex: 1 },
   body: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: 18,
     paddingTop: 26,
+    paddingBottom: 18,
   },
 
   // ── top bar ──
@@ -299,7 +289,6 @@ const styles = StyleSheet.create({
   flexDirection: "row",
   gap: 10,
   marginBottom: 14,
-  maxHeight: SCREEN_HEIGHT * 0.90,
   },
 
   heroCard: {
@@ -371,7 +360,6 @@ const styles = StyleSheet.create({
   },
   resourceCard: {
     flex: 1,
-    maxHeight: 190,
     backgroundColor: C.cardTan,
     borderRadius: 14,
     padding: 12,
