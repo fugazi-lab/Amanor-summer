@@ -9,7 +9,6 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { TriggerRecordingProvider } from "@/contexts/TriggerRecordingContext";
 
 export const unstable_settings = {
   initialRouteName: "home",
@@ -19,7 +18,6 @@ export default function DrawerLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <TriggerRecordingProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <Drawer
           screenOptions={{
@@ -159,18 +157,24 @@ export default function DrawerLayout() {
               ),
             }}
           />
-          <Drawer.Screen
-            name="legal"
+        <Drawer.Screen
+          name="legal"
             options={{
               drawerLabel: "Legal & Rights",
               title: "Legal & Rights",
               drawerIcon: ({ color }) => (
                 <IconSymbol size={24} name="doc.text.fill" color={color} />
               ),
-            }}
-          />
+          }}
+        />
+        <Drawer.Screen
+          name="legal-employer"
+          options={{
+            drawerItemStyle: { display: "none" },
+            title: "Employer Responsibilities",
+          }}
+        />
         </Drawer>
       </GestureHandlerRootView>
-    </TriggerRecordingProvider>
   );
 }

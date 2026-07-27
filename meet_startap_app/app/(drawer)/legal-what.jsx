@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
   exampleText: {
     fontFamily: "Ledger_400Regular",
     fontSize: 20,
-    color: C.burgundy,
+    color: "#6D4D40",
     lineHeight: 28,
     textAlign: "center",
   },

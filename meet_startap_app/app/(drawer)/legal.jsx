@@ -78,6 +78,9 @@ export default function LegalScreen() {
         {/* ── TITLE ── */}
         <Text style={styles.title}>Your Rights</Text>
 
+        {/* ── DIVIDER ── */}
+        <View style={styles.divider} />
+
         <TouchableOpacity
           style={[styles.rightsCard, rightsOpen && styles.rightsCardOpen]}
           activeOpacity={1}
@@ -95,9 +98,6 @@ export default function LegalScreen() {
           )}
         </TouchableOpacity>
         <Text style={styles.holdHint}>Tap to switch</Text>
-
-        {/* ── DIVIDER ── */}
-        <View style={styles.divider} />
 
         <Text style={styles.subheading}>Your Rights</Text>
 
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   carousel: { flexDirection: "row", alignItems: "center", gap: 8 },
   sideCard: { width: 48, height: 150, borderRadius: 14, alignItems: "center", justifyContent: "center" },
   rightCard: { flex: 1, minHeight: 190, borderRadius: 24, padding: 22, alignItems: "center", justifyContent: "center" },
-  rightText: { fontFamily: "Ledger_400Regular", fontSize: 17, color: C.burgundy, lineHeight: 25, textAlign: "center" },
+  rightText: { fontFamily: "Ledger_400Regular", fontSize: 17, color: "#6D4D40", lineHeight: 25, textAlign: "center" },
   arrow: { fontSize: 36, color: C.white, lineHeight: 38 },
   dots: { flexDirection: "row", justifyContent: "center", gap: 6, marginTop: 14 },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.divider },

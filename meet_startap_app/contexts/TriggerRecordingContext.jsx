@@ -500,7 +500,7 @@ export function TriggerRecordingProvider({ children }) {
           <View style={s.modalContent}>
             <Text style={s.modalTitle}>🎙️ Recording</Text>
             <Text style={s.modalSubtitle}>
-              Heard "{triggerWord.trim()}" — recording is in progress.
+              Heard “{triggerWord.trim()}” — recording is in progress.
             </Text>
             <Text style={s.modalHint}>
               Save it to keep it on this device, or dismiss to discard it.
