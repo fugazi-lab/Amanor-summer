@@ -174,6 +174,22 @@ export default function DrawerLayout() {
             title: "Employer Responsibilities",
           }}
         />
+        <Drawer.Screen
+          name="auth-therapist"
+          options={{ drawerItemStyle: { display: "none" } }}
+        />
+        <Drawer.Screen
+          name="old stuff/index(old)"
+          options={{ drawerItemStyle: { display: "none" } }}
+        />
+        <Drawer.Screen
+          name="old stuff/explore(old)"
+          options={{ drawerItemStyle: { display: "none" } }}
+        />
+        <Drawer.Screen
+          name="old stuff/_layout (old)"
+          options={{ drawerItemStyle: { display: "none" } }}
+        />
         </Drawer>
       </GestureHandlerRootView>
   );

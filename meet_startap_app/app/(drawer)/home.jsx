@@ -15,7 +15,6 @@
 
 import { Ledger_400Regular } from "@expo-google-fonts/ledger";
 import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
-import { useNavigation } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -47,7 +46,6 @@ const C = {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const navigation = useNavigation();
   const { username } = useLocalSearchParams();
   const user = username || "anon";
 
@@ -63,16 +61,6 @@ export default function HomeScreen() {
       </SafeAreaView>
     );
   }
-
-  // opens the drawer (swipeEnabled is off in the drawer layout, so this
-  // hamburger button is the way in now)
-  const openMenu = () => {
-    try {
-      navigation.toggleDrawer();
-    } catch (e) {
-      // drawer not available in this navigation context — ignore
-    }
-  };
 
   const handleProfilePress = () => {
     Alert.alert(user, "Account options", [
@@ -93,13 +81,7 @@ export default function HomeScreen() {
 
         {/* ── TOP BAR ── */}
         <View style={styles.topBar}>
-          <TouchableOpacity
-            onPress={openMenu}
-            style={styles.iconBtn}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <Text style={styles.menuIcon}>☰</Text>
-          </TouchableOpacity>
+          <View style={styles.topBarSpacer} />
 
           <View style={styles.brandWrap}>
             <Text style={styles.brandName}>Amanor</Text>
@@ -250,8 +232,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 10,
   },
-  iconBtn: { paddingTop: 4 },
-  menuIcon: { fontSize: 20, color: C.text },
+  topBarSpacer: { width: 32, height: 32 },
   brandWrap: { flex: 1, alignItems: "center" },
   brandName: {
     fontFamily: "OtomanopeeOne_400Regular",
