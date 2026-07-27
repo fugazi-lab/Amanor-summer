@@ -9,7 +9,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-
+import { TriggerRecordingProvider } from "@/contexts/TriggerRecordingContext";
 export const unstable_settings = {
   initialRouteName: "home",
 };
