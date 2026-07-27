@@ -29,13 +29,25 @@ const C = {
 };
 
 const BULLETS = [
-  "Safe Workplace: Employers Must Prevent Harassment And Have Clear Reporting Procedures.",
-  "Report The Incident: You Can Report To The Workplace Harassment Officer, HR, Or A Manager. The Complaint Must Be Investigated Confidentially.",
-  "Protection: It Is Illegal For An Employer To Punish Or Fire You For Reporting Harassment.",
-  "Police Report: Serious Cases Can Be Reported To The Police.",
-  "Compensation: Victims May File A Claim In Labor Court And Receive Financial Compensation.",
-  "Privacy & Support: Your Identity Can Be Protected, And You Can Receive Legal And Emotional Support.",
+  "Submit a workplace complaint, orally or in writing. Another person may also submit it on your behalf.",
+  "Have your complaint investigated promptly and as privately as possible.",
+  "Be protected from retaliation or workplace harm, such as dismissal, demotion, reduced hours or unfair treatment.",
+  "Be separated from the person complained about, when appropriate and possible.",
+  "Receive a reasoned written decision and review the investigation summary and recommendations.",
+  "File a police complaint, a civil lawsuit or both, in addition to the workplace complaint.",
+  "Not prove that she clearly rejected repeated sexual advances or comments when a manager or supervisor abused their authority.",
+  "Apply for recognition as a work-injury victim if the harassment caused physical or psychological harm. This may provide medical treatment, injury benefits or disability benefits.",
+  "Apply for unemployment benefits without the usual waiting period if you resigned because of workplace sexual harassment, subject to the eligibility requirements.",
+  // "The Employer Must",
+  // "Appoint someone responsible for handling sexual-harassment complaints.",
+  // "Provide a clear way to submit complaints.",
+  // "Investigate complaints without unnecessary delay.",
+  // "Protect the complainant and take steps to stop further harassment.",
+  // "Publish a sexual-harassment policy when the workplace has more than 25 employees.",
+  // "These rights apply to harassment connected to work, including some cases that happen outside the physical workplace.",
 ];
+
+
 
 export default function LegalScreen() {
   const router = useRouter();
@@ -103,20 +115,21 @@ export default function LegalScreen() {
 
         <View
           style={styles.carousel}
-          onTouchStart={({ nativeEvent }) => { swipeX.current = nativeEvent.pageX; }}
-          onTouchEnd={({ nativeEvent }) => {
+          onStartShouldSetResponder={() => true}
+          onResponderGrant={({ nativeEvent }) => { swipeX.current = nativeEvent.pageX; }}
+          onResponderRelease={({ nativeEvent }) => {
             const distance = nativeEvent.pageX - swipeX.current;
             if (distance > 40) setRight(previous);
             if (distance < -40) setRight(next);
           }}
         >
-          <TouchableOpacity style={[styles.sideCard, { backgroundColor: previous % 2 ? "#C49378" : "#D98FA3" }]} onPress={() => setRight(previous)}>
+          <TouchableOpacity style={[styles.sideCard, { backgroundColor: right % 2 ? "#D98FA3" : "#C49378" }]} onPress={() => setRight(previous)}>
             <Text style={styles.arrow}>‹</Text>
           </TouchableOpacity>
           <View style={[styles.rightCard, { backgroundColor: right % 2 ? "#C49378" : "#D98FA3" }]}>
             <Text style={styles.rightText}>{BULLETS[right]}</Text>
           </View>
-          <TouchableOpacity style={[styles.sideCard, { backgroundColor: next % 2 ? "#C49378" : "#D98FA3" }]} onPress={() => setRight(next)}>
+          <TouchableOpacity style={[styles.sideCard, { backgroundColor: right % 2 ? "#D98FA3" : "#C49378" }]} onPress={() => setRight(next)}>
             <Text style={styles.arrow}>›</Text>
           </TouchableOpacity>
         </View>

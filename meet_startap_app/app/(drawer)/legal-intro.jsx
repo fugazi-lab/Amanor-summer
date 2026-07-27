@@ -105,6 +105,16 @@ export default function LegalIntroScreen() {
 
         <View style={{ height: 16 }} />
 
+        <TouchableOpacity
+          style={[styles.btn, { backgroundColor: C.btnPink }]}
+          onPress={() => router.push("/(drawer)/legal-employer")}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.btnText}>What Employers Must Do</Text>
+        </TouchableOpacity>
+
+        <View style={{ height: 16 }} />
+
         {/* ── BUTTON 3: Get Professional Legal Guidance ──
         <TouchableOpacity
           style={[styles.btn, { backgroundColor: C.btnPink }]}

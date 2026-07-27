@@ -167,6 +167,13 @@ export default function DrawerLayout() {
             ),
           }}
         />
+        <Drawer.Screen
+          name="legal-employer"
+          options={{
+            drawerItemStyle: { display: "none" },
+            title: "Employer Responsibilities",
+          }}
+        />
       </Drawer>
     </GestureHandlerRootView>
   );

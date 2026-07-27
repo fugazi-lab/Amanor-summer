@@ -29,9 +29,22 @@ import {
   View,
 } from "react-native";
 
-import { AMANOR } from "../../constants/amanor-theme";
-
-const C = AMANOR.colors;
+const C = {
+  bg: "#FBF3EA",
+  text: "#33201A",
+  muted: "#8A7566",
+  rose: "#C0455F",
+  roseSoft: "#F6DCE0",
+  roseCircle: "#F0C7CE",
+  tan: "#F0E1D2",
+  tanCircle: "#DCC0A4",
+  brown: "#8B6F5C",
+  cardTan: "#F1E7DA",
+  bannerBg: "#F3D7DA",
+  white: "#FFFFFF",
+  navBg: "#F6EFE6",
+  divider: "#D9C7B8",
+};
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -242,7 +255,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 18,
     paddingTop: 26,
-    paddingBottom: 18,
+    paddingBottom: 110,
   },
 
   // ── top bar ──
@@ -417,6 +430,10 @@ const styles = StyleSheet.create({
 
   // ── bottom nav ──
   navBar: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
     flexDirection: "row",
     alignItems: "flex-start",
     backgroundColor: C.navBg,
@@ -425,6 +442,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 20,
     paddingHorizontal: 6,
+    zIndex: 10,
   },
   navTab: { flex: 1, alignItems: "center", gap: 4 },
   navIcon: { fontSize: 20, color: C.muted },

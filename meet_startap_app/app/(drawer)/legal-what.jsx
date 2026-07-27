@@ -101,8 +101,9 @@ export default function LegalWhatScreen() {
 
         <View
           style={styles.carousel}
-          onTouchStart={({ nativeEvent }) => { swipeX.current = nativeEvent.pageX; }}
-          onTouchEnd={({ nativeEvent }) => {
+          onStartShouldSetResponder={() => true}
+          onResponderGrant={({ nativeEvent }) => { swipeX.current = nativeEvent.pageX; }}
+          onResponderRelease={({ nativeEvent }) => {
             const distance = nativeEvent.pageX - swipeX.current;
             if (distance > 40) setExample(previous);
             if (distance < -40) setExample(next);
