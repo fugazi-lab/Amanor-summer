@@ -194,9 +194,16 @@ export function TriggerRecordingProvider({ children }) {
   const [speechSupported, setSpeechSupported] = useState(true);
 
   const [armed, setArmed] = useState(false);
-  const [monitorPhase, setMonitorPhase] = useState(null); // null | "listening" | "recording"
+  const [monitorPhase, setMonitorPhase] = useState(null); // null | "listening" | "recording" | "paused"
   const [modalVisible, setModalVisible] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // ── Always keep refs up-to-date with state to prevent stale closures ────────
+  const armedRef = useRef(armed);
+  armedRef.current = armed;
+
+  const monitorPhaseRef = useRef(monitorPhase);
+  monitorPhaseRef.current = monitorPhase;
 
   const webviewRef = useRef(null);
   const listenContextRef = useRef(null); // "test" | "monitor"
@@ -353,6 +360,25 @@ export function TriggerRecordingProvider({ children }) {
     setMonitorPhase(null);
   };
 
+  // Temporarily suspend listening (e.g. while viewing files.jsx) without
+  // fully disarming — armed stays true, monitorPhase becomes "paused".
+  const pauseMonitoring = () => {
+    if (armedRef.current && monitorPhaseRef.current === "listening") {
+      postToWebview("stop");
+      listenContextRef.current = null;
+      setMonitorPhase("paused");
+    }
+  };
+
+  // Resume listening after a pause, only if still armed.
+  const resumeMonitoring = () => {
+    if (armedRef.current && monitorPhaseRef.current === "paused") {
+      listenContextRef.current = "monitor";
+      postToWebview("start");
+      setMonitorPhase("listening");
+    }
+  };
+
   const startTriggeredRecording = async () => {
     try {
       const { status: permStatus } = await Audio.requestPermissionsAsync();
@@ -460,6 +486,8 @@ export function TriggerRecordingProvider({ children }) {
     monitorPhase,
     handleTest,
     handleSetUp,
+    pauseMonitoring,
+    resumeMonitoring,
   };
 
   return (
