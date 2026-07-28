@@ -21,8 +21,9 @@ import * as FileSystem from "expo-file-system/legacy";
 import { useFonts } from "expo-font";
 import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
 import { Ledger_400Regular } from "@expo-google-fonts/ledger";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
+import { useTriggerRecording } from "@/contexts/TriggerRecordingContext";
 import {
   ActivityIndicator,
   Alert,
@@ -229,6 +230,20 @@ export default function FilesScreen() {
   useFonts({ OtomanopeeOne_400Regular, Ledger_400Regular });
   const router = useRouter();
   const { username } = useLocalSearchParams();
+
+  // Pause the trigger-word listener while this screen is focused,
+  // resume it as soon as the user navigates away (works even though
+  // Drawer screens stay mounted in the background).
+  const { armed, pauseMonitoring, resumeMonitoring } = useTriggerRecording();
+  useFocusEffect(
+    useCallback(() => {
+      if (armed) pauseMonitoring();
+      return () => {
+        if (armed) resumeMonitoring();
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [armed])
+  );
   const user = username || "anon";
 
   const [files, setFiles]           = useState([]);
