@@ -38,7 +38,7 @@ const C = {
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { username } = useLocalSearchParams();
+  const { username, returnTo } = useLocalSearchParams();
   const user = username || "anon";
 
   const [fontsLoaded] = useFonts({
@@ -61,6 +61,17 @@ export default function ProfileScreen() {
     ]);
   };
 
+  const handleBack = () => {
+    if (returnTo === "therapist-home") {
+      router.replace({
+        pathname: "/(drawer)/therapist-home",
+        params: { username: user },
+      });
+      return;
+    }
+    router.back();
+  };
+
   return (
     <SafeAreaView style={styles.root}>
       <View style={styles.body}>
@@ -68,7 +79,7 @@ export default function ProfileScreen() {
         {/* ── TOP BAR ── */}
         <View style={styles.topBar}>
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={handleBack}
             style={styles.iconBtn}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
