@@ -56,6 +56,7 @@ const C = {
 };
 
 const RELATIONSHIPS = ["Supervisor", "Coworker", "Manager", "Client / Customer", "Other"];
+const INCIDENT_TYPES = ["Verbal Harassment", "Unwanted Touch", "Sexual Harassment", "Other"];
 
 export default function ReportFormScreen() {
   const router = useRouter();
@@ -71,8 +72,11 @@ export default function ReportFormScreen() {
   const [company, setCompany]       = useState("");
   const [position, setPosition]     = useState("");
   const [personPos, setPersonPos]   = useState("");
+  const [abuserName, setAbuserName] = useState("");
   const [relationship, setRelationship] = useState("");
+  const [incidentType, setIncidentType] = useState("");
   const [showRelDrop, setShowRelDrop]   = useState(false);
+  const [showTypeDrop, setShowTypeDrop] = useState(false);
   const [submitting, setSubmitting]     = useState(false);
   const [submitted, setSubmitted]       = useState(false);
 
@@ -99,7 +103,9 @@ export default function ReportFormScreen() {
       company:        company.trim(),
       position:       position.trim(),
       personPosition: personPos.trim(),
+      abuserName:     abuserName.trim() || "Not specified",
       relationship:   relationship || "Not specified",
+      incidentType:   incidentType || "Other",
       recordingIds:   recordingIds,
       anonymous:      isAnonymous,
     };
@@ -244,6 +250,45 @@ export default function ReportFormScreen() {
             onChangeText={setPersonPos}
           />
         </View>
+
+        {/* abuser's name */}
+        <View style={styles.inputWrap}>
+          <TextInput
+            style={styles.input}
+            placeholder="Name of the person involved:"
+            placeholderTextColor={C.muted}
+            value={abuserName}
+            onChangeText={setAbuserName}
+          />
+        </View>
+
+        {/* incident type dropdown */}
+        <View style={styles.inputWrap}>
+          <TouchableOpacity
+            style={styles.dropdownTrigger}
+            onPress={() => setShowTypeDrop(!showTypeDrop)}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.input, { flex: 1, paddingVertical: 0 }]}>
+              {incidentType || "Type Of Incident"}
+            </Text>
+            <Text style={styles.dropArrow}>∨</Text>
+          </TouchableOpacity>
+        </View>
+
+        {showTypeDrop && (
+          <View style={styles.dropdown}>
+            {INCIDENT_TYPES.map((t) => (
+              <TouchableOpacity
+                key={t}
+                style={styles.dropItem}
+                onPress={() => { setIncidentType(t); setShowTypeDrop(false); }}
+              >
+                <Text style={styles.dropItemText}>{t}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
 
         {/* relationship dropdown */}
         <View style={styles.inputWrap}>

@@ -1,8 +1,9 @@
 /*
     role-pick.jsx — who are you?
     sits between the welcome screen and auth.
-    "A Women" → existing auth.jsx
-    "A Therapist" → coming soon (placeholder alert)
+    "A Therapist" → auth-therapist.jsx
+    "A Woman" → existing auth.jsx
+    "A Company" → auth-company.jsx (sign in only)
     fonts: Otomanopee One + Ledger
 */
 
@@ -58,7 +59,17 @@ export default function RolePickScreen() {
         {/* ── BUTTONS ── */}
         <View style={styles.buttonsSection}>
 
-          {/* A Women */}
+          {/* A Therapist */}
+          <TouchableOpacity
+            style={styles.optionBtn}
+            onPress={() => router.replace("/auth-therapist")}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.optionTitle}>A Therapist</Text>
+            <Text style={styles.optionDesc}>Provide Professional Emotional Support To Women</Text>
+          </TouchableOpacity>
+
+          {/* A Woman */}
           <TouchableOpacity
             style={styles.optionBtn}
             onPress={() => router.replace("/auth")}
@@ -68,14 +79,14 @@ export default function RolePickScreen() {
             <Text style={styles.optionDesc}>Get Support And Document Evidence</Text>
           </TouchableOpacity>
 
-          {/* A Therapist */}
+          {/* A Company */}
           <TouchableOpacity
             style={styles.optionBtn}
-            onPress={() => router.replace("/auth-therapist")}
+            onPress={() => router.replace("/auth-company")}
             activeOpacity={0.85}
           >
-            <Text style={styles.optionTitle}>A Therapist</Text>
-            <Text style={styles.optionDesc}>Support Women Mentally</Text>
+            <Text style={styles.optionTitle}>A Company</Text>
+            <Text style={styles.optionDesc}>Support Your Employees</Text>
           </TouchableOpacity>
 
         </View>
@@ -107,16 +118,16 @@ const styles = StyleSheet.create({
 },
 
 titleSection: {
-  height: "28%",
+  height: "20%",
   justifyContent: "center",
   alignItems: "center",
 },
 
 title: {
   fontFamily: "OtomanopeeOne_400Regular",
-  fontSize: 46,
+  fontSize: 40,
   color: C.burgundy,
-  lineHeight: 56,
+  lineHeight: 50,
   textAlign: "center",
 },
 
@@ -129,34 +140,36 @@ rule: {
 },
 
 buttonsSection: {
-  height: "42%",
+  height: "62%",
   justifyContent: "center",
   alignItems: "center",
-  gap: "7%",
+  gap: "5%",
 },
 
 optionBtn: {
   width: "92%",
   backgroundColor: C.burgundy,
   borderRadius: 20,
-  paddingVertical: "6%",
+  paddingVertical: "5%",
   alignItems: "center",
 },
 
 optionTitle: {
     fontFamily: "OtomanopeeOne_400Regular",
-    fontSize: 28,
+    fontSize: 24,
     color: C.white,
-    marginBottom: 8,
+    marginBottom: 6,
     opacity: 0.95,
 },
 
 optionDesc: {
     fontFamily: "Ledger_400Regular",
-    fontSize: 13,
+    fontSize: 12,
     color: C.white,
     opacity: 0.7,
     letterSpacing: 0.3,
+    textAlign: "center",
+    paddingHorizontal: 10,
 },
 
 bottomLogoWrap: {
