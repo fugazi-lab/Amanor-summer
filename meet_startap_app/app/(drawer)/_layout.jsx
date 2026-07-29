@@ -1,5 +1,6 @@
 /*
     This is the layout for the drawer navigation.
+    provides a consistent navigation experience across the app.
 */
 
 import { Drawer } from "expo-router/drawer";
