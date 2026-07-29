@@ -2,10 +2,11 @@
     emotional-help.jsx — emotional support landing page.
     sits between home.jsx and the support/discussion screens.
     "Join The Survivors Support Network" → index.jsx (discussion board)
-    "A Meeting With A Therapy" → coming soon (future page)
+    "A Meeting With A Therapy" → schedule-meeting.jsx (future page)
     fonts: Otomanopee One + Ledger
 */
 
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Ledger_400Regular } from "@expo-google-fonts/ledger";
 import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
 import { useFonts } from "expo-font";
@@ -14,22 +15,50 @@ import {
   ActivityIndicator,
   Image,
   SafeAreaView,
-  StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View
 } from "react-native";
 
 const C = {
-  bg:       "#f5f0e0",
-  burgundy: "#7a2035",
-  text:     "#3a2020",
-  muted:    "#9a8070",
-  white:    "#ffffff",
+  bg:         "#f5f0e0",
+  burgundy:   "#7a2035",
+  text:       "#3a2020",
+  muted:      "#9a8070",
+  cardBg:     "#fbf3ee",
+  cardBorder: "#e9d6ce",
+  iconBg:     "#f2d9d9",
+  white:      "#ffffff",
 };
+
+// card config — icon + copy + route in one place
+const ITEMS = [
+  {
+    key: "network",
+    route: "/(drawer)/",
+    label: "Join The Survivors\nSupport Network",
+    Icon: Ionicons,
+    iconName: "people-outline",
+  },
+  {
+    key: "therapy",
+    route: "/(drawer)/schedule-meeting",
+    label: "A Therapy Sessions",
+    Icon: MaterialCommunityIcons,
+    iconName: "sofa-outline",
+  },
+];
 
 export default function EmotionalHelpScreen() {
   const router = useRouter();
+  const { width, height } = useWindowDimensions();
+
+  // clamp scaling width to a phone-like max so proportions stay consistent
+  // on wide viewports (pc / tablet / web) instead of ballooning with them
+  const layoutWidth = Math.min(width, 480);
+  const wp = (p) => (layoutWidth * p) / 100;
+  const hp = (p) => (height * p) / 100;
 
   const [fontsLoaded] = useFonts({
     OtomanopeeOne_400Regular,
@@ -38,134 +67,114 @@ export default function EmotionalHelpScreen() {
 
   if (!fontsLoaded) {
     return (
-      <SafeAreaView style={[styles.root, { justifyContent: "center", alignItems: "center" }]}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: C.bg, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator color={C.burgundy} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.root}>
-      <View style={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }}>
+      <View style={{ flex: 1, width: "100%", maxWidth: 480, alignSelf: "center", paddingHorizontal: wp(7), justifyContent: "center" }}>
 
-        {/* ── BULB TOP LEFT ── */}
-        <View style={styles.topBulb}>
+        {/* ── LOGO LOCKUP ── */}
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
           <Image
             source={require("../../assets/bulblogo.png")}
-            style={styles.bulb}
+            style={{ width: wp(9), height: wp(9), marginRight: wp(2) }}
             resizeMode="contain"
           />
+          <Text style={{ fontFamily: "OtomanopeeOne_400Regular", fontSize: wp(6.5), color: C.burgundy }}>
+            AmanOr
+          </Text>
         </View>
 
-        {/* ── TITLE + RULE ── */}
-        <View style={styles.titleSection}>
-          <Text style={styles.title}>Emotional Help</Text>
-          <View style={styles.rule} />
+        {/* ── TITLE + DIVIDER ── */}
+        <View style={{ alignItems: "center", marginTop: hp(2), marginBottom: hp(3) }}>
+          <Text style={{ fontFamily: "OtomanopeeOne_400Regular", fontSize: wp(8), color: C.burgundy }}>
+            Emotional Help
+          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", marginTop: hp(1) }}>
+            <View style={{ width: wp(8), height: 1, backgroundColor: C.burgundy, opacity: 0.35 }} />
+            <Ionicons name="heart" size={wp(3.2)} color={C.burgundy} style={{ marginHorizontal: wp(2), opacity: 0.7 }} />
+            <View style={{ width: wp(8), height: 1, backgroundColor: C.burgundy, opacity: 0.35 }} />
+          </View>
         </View>
 
-        {/* ── BUTTONS ── */}
-        <View style={styles.buttonsSection}>
+        {/* ── CARDS ── */}
+        <View style={{ gap: hp(2.5) }}>
+          {ITEMS.map(({ key, route, label, Icon, iconName }) => (
+            <TouchableOpacity
+              key={key}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: C.cardBg,
+                borderColor: C.cardBorder,
+                borderWidth: 1,
+                borderRadius: wp(5.5),
+                paddingVertical: hp(3),
+                paddingHorizontal: wp(5.5),
+              }}
+              onPress={() => router.push(route)}
+              activeOpacity={0.85}
+            >
+              <Text
+                style={{
+                  flex: 1,
+                  fontFamily: "OtomanopeeOne_400Regular",
+                  fontSize: wp(5),
+                  color: C.burgundy,
+                  lineHeight: wp(6.2),
+                }}
+              >
+                {label}
+              </Text>
 
-          {/* Join The Survivors Support Network */}
-          <TouchableOpacity
-            style={styles.optionBtn}
-            onPress={() => router.push("/(drawer)/")}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.optionText}>Join the Survivors{"\n"}Support Network</Text>
-          </TouchableOpacity>
-
-          {/* A Meeting With A Therapy */}
-          <TouchableOpacity
-            style={styles.optionBtn}
-            onPress={() => router.push("/(drawer)/schedule-meeting")}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.optionText}>Book a meeting{"\n"}with a therapist</Text>
-          </TouchableOpacity>
-
+              <View
+                style={{
+                  width: wp(17),
+                  height: wp(17),
+                  borderRadius: wp(8.5),
+                  backgroundColor: C.iconBg,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginLeft: wp(3),
+                }}
+              >
+                <Icon name={iconName} size={wp(8.5)} color={C.burgundy} />
+              </View>
+            </TouchableOpacity>
+          ))}
         </View>
 
-        <TouchableOpacity style={styles.backLink} onPress={() => router.replace("/(drawer)/home")}>
-          <Text style={styles.backLinkText}>{"< Back"}</Text>
+        {/* ── BACK ── */}
+        <TouchableOpacity
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: C.burgundy,
+            borderRadius: wp(7),
+            paddingVertical: hp(2),
+            marginTop: hp(4),
+            gap: wp(1.5),
+            shadowColor: C.burgundy,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.25,
+            shadowRadius: 10,
+            elevation: 4,
+          }}
+          onPress={() => router.replace("/(drawer)/home")}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="chevron-back" size={wp(4.5)} color={C.white} />
+          <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(4.2), color: C.white }}>
+            Back
+          </Text>
         </TouchableOpacity>
 
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: C.bg,
-  },
-
-  container: {
-    flex: 1,
-    paddingHorizontal: "7%",
-  },
-
-  // ── bulb ──
-  topBulb: {
-    position: "absolute",
-    top: 18,
-    left: 18,
-    zIndex: 10,
-  },
-
-  bulb: {
-    width: 28,
-    height: 28,
-    opacity: 0.35,
-  },
-
-  // ── title ──
-  titleSection: {
-  paddingTop: 60,
-  marginBottom: "4%",
-  },
-  title: {
-    fontFamily: "OtomanopeeOne_400Regular",
-    fontSize: 36,
-    color: C.burgundy,
-    marginBottom: "5%",
-  },
-  rule: {
-    height: 1.5,
-    backgroundColor: C.burgundy,
-    width: "100%",
-    opacity: 0.4,
-  },
-
-  // ── buttons ──
-  buttonsSection: {
-    flex: 1,
-    justifyContent: "flex-start",
-    paddingTop: "8%",
-    gap: "5%",
-  },
-  optionBtn: {
-    backgroundColor: C.burgundy,
-    borderRadius: 18,
-    paddingVertical: "7%",
-    paddingHorizontal: "6%",
-    alignItems: "center",
-    shadowColor: C.burgundy,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  optionText: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 16,
-    color: C.white,
-    opacity: 0.85,
-    textAlign: "center",
-    lineHeight: 24,
-    letterSpacing: 0.3,
-  },
-  backLink: { backgroundColor: C.burgundy, borderRadius: 40, paddingVertical: 18, alignItems: "center", marginBottom: 16, shadowColor: C.burgundy, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 4 },
-  backLinkText: { fontFamily: "Ledger_400Regular", fontSize: 20, color: C.white, letterSpacing: 0.5 },
-});

@@ -1,9 +1,9 @@
 /*
     schedule-meeting.jsx — pick a date to meet a therapist.
     shows current month only as a calendar grid.
-    6-8 random sessions per month, each with therapist name, start/end time.
-    days with sessions are visually marked. tapping opens a session card modal.
-    fonts: Otomanopee One + Ledger
+    Styled accurately to match the provided layout.
+    Features percentage-based scaling and vector icons replacing all emojis.
+    Updated to center elements vertically and maintain top/bottom proportionality.
 */
 
 import { Ledger_400Regular } from "@expo-google-fonts/ledger";
@@ -14,7 +14,6 @@ import { useMemo, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
-    Image,
     Modal,
     SafeAreaView,
     StyleSheet,
@@ -22,27 +21,23 @@ import {
     TouchableOpacity,
     View
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 const C = {
-  bg:         "#f5f0e0",
-  burgundy:   "#7a2035",
-  calendarBg: "#c07a8a",
-  cellBorder: "#b06878",
-  text:       "#3a2020",
-  muted:      "#9a8070",
-  white:      "#ffffff",
-  todayBg:    "#7a2035",
-  sessionDot: "#f5d0d8",
+  bg:         "#FAF5EB",
+  burgundy:   "#902A3C",
+  text:       "#5E4B4B",
+  muted:      "#9A8070",
+  white:      "#FFFFFF",
+  divider:    "#D9C7B6",
 };
 
 const DAYS = ["S", "M", "T", "W", "T", "F", "S"];
 
-// ── generate session data once per month ─────────────────────
 const SESSION_HOURS = [9, 10, 11, 13, 14, 15, 16];
 
 const generateSessions = (year, month, daysInMonth) => {
-  // pick 6-8 unique random days
-  const count = 6 + Math.floor(Math.random() * 3); // 6,7,8
+  const count = 6 + Math.floor(Math.random() * 3);
   const days = new Set();
   while (days.size < count) {
     days.add(1 + Math.floor(Math.random() * daysInMonth));
@@ -79,7 +74,6 @@ export default function ScheduleMeetingScreen() {
   const router = useRouter();
   const { monthName, year, month, cells, today, daysInMonth } = getMonthData();
 
-  // generate sessions once, stable for this render
   const sessions = useMemo(
     () => generateSessions(year, month, daysInMonth),
     [year, month, daysInMonth]
@@ -109,7 +103,6 @@ export default function ScheduleMeetingScreen() {
 
   const session = selectedDay ? sessions[selectedDay] : null;
 
-  // chunk into rows of 7
   const rows = [];
   for (let i = 0; i < cells.length; i += 7) {
     rows.push(cells.slice(i, i + 7));
@@ -119,69 +112,72 @@ export default function ScheduleMeetingScreen() {
     <SafeAreaView style={styles.root}>
       <View style={styles.container}>
 
-        
-
-        {/* ── TITLE ── */}
+        {/* ── TITLE & DIVIDER ── */}
         <Text style={styles.title}>Schedule A Meeting</Text>
+        
+        <View style={styles.dividerContainer}>
+          <View style={styles.dividerLine} />
+          <Ionicons name="leaf-outline" size={20} color={C.burgundy} style={styles.dividerIcon} />
+          <View style={styles.dividerLine} />
+        </View>
+
         <Text style={styles.subtitle}>Choose A Date:</Text>
-        <Text style={styles.monthLabel}>{monthName} {year}</Text>
 
         {/* ── CALENDAR ── */}
-        <View style={styles.calendar}>
+        <View style={styles.calendarCard}>
+          
+          {/* header */}
+          <View style={styles.calHeader}>
+            <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Ionicons name="chevron-back" size={24} color={C.burgundy} />
+            </TouchableOpacity>
+            <Text style={styles.monthName}>{monthName}</Text>
+            <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Ionicons name="chevron-forward" size={24} color={C.burgundy} />
+            </TouchableOpacity>
+          </View>
 
-          {/* day headers */}
+          {/* day labels */}
           <View style={styles.calRow}>
             {DAYS.map((d, i) => (
-              <View key={i} style={styles.calCell}>
+              <View key={i} style={styles.calCellWrapper}>
                 <Text style={styles.dayHeader}>{d}</Text>
               </View>
             ))}
           </View>
 
-          {/* date rows */}
+          {/* date grid */}
           {rows.map((row, ri) => (
             <View key={ri} style={styles.calRow}>
               {row.map((day, di) => {
-                const isToday   = day === today;
-                const hasSession = day && !!sessions[day];
+                const isToday = day === today;
                 return (
                   <TouchableOpacity
                     key={di}
-                    style={[
-                      styles.calCell,
-                      styles.dateCell,
-                      isToday && styles.todayCell,
-                    ]}
+                    style={styles.calCellWrapper}
                     onPress={() => handleDayPress(day)}
                     activeOpacity={day ? 0.7 : 1}
                   >
-                    {day ? (
-                      <>
+                    <View style={[styles.dateCell, isToday && styles.todayCell]}>
+                      {day ? (
                         <Text style={[styles.dateText, isToday && styles.todayText]}>
                           {day}
                         </Text>
-                        {hasSession && (
-                          <View style={styles.sessionDot} />
-                        )}
-                      </>
-                    ) : null}
+                      ) : null}
+                    </View>
                   </TouchableOpacity>
                 );
               })}
             </View>
           ))}
-
         </View>
 
-        {/* ── LEGEND ── */}
-        <View style={styles.legend}>
-          <View style={styles.legendDot} />
-          <Text style={styles.legendText}>session available</Text>
+        {/* ── BACK BUTTON ── */}
+        <View style={styles.backBtnWrapper}>
+            <TouchableOpacity style={styles.backLink} onPress={() => router.replace("/(drawer)/emotional-help")}>
+            <Text style={styles.backLinkText}>{"< Back"}</Text>
+            </TouchableOpacity>
         </View>
-
-        <TouchableOpacity style={styles.backLink} onPress={() => router.replace("/(drawer)/emotional-help")}>
-          <Text style={styles.backLinkText}>{"< Back"}</Text>
-        </TouchableOpacity>
 
       </View>
 
@@ -195,68 +191,65 @@ export default function ScheduleMeetingScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
 
-            {/* date heading */}
             <Text style={styles.modalDate}>
               {selectedDay} {monthName} {year}
             </Text>
 
             {session ? (
-              <>
-                {/* session card */}
-                <View style={styles.sessionCard}>
-
-                  {/* avatar + name */}
-                  <View style={styles.sessionHeader}>
-                    <View style={styles.avatar}>
-                      <Text style={styles.avatarText}>👤</Text>
-                    </View>
-                    <View>
-                      <Text style={styles.sessionName}>{session.name}</Text>
-                      <Text style={styles.sessionRole}>Therapist</Text>
-                    </View>
+              <View style={styles.sessionCard}>
+                
+                <View style={styles.sessionHeader}>
+                  <View style={styles.avatar}>
+                    <Ionicons name="person" size={24} color={C.burgundy} />
                   </View>
-
-                  {/* divider */}
-                  <View style={styles.sessionDivider} />
-
-                  {/* time */}
-                  <View style={styles.sessionTimeRow}>
-                    <Text style={styles.sessionTimeLabel}>🕐  Time</Text>
-                    <Text style={styles.sessionTime}>
-                      {session.start} – {session.end}
-                    </Text>
+                  <View style={styles.sessionHeaderText}>
+                    <Text style={styles.sessionName}>{session.name}</Text>
+                    <Text style={styles.sessionRole}>Therapist</Text>
                   </View>
-
-                  {/* duration */}
-                  <View style={styles.sessionTimeRow}>
-                    <Text style={styles.sessionTimeLabel}>⏱  Duration</Text>
-                    <Text style={styles.sessionTime}>1 hour</Text>
-                  </View>
-
-                  {/* join button */}
-                  <TouchableOpacity
-                    style={styles.joinBtn}
-                    onPress={() =>
-                      Alert.alert(
-                        "Joining Meeting",
-                        `Meeting with ${session.name} at ${session.start} — link coming soon.`
-                      )
-                    }
-                    activeOpacity={0.85}
-                  >
-                    <Text style={styles.joinBtnText}>🎥  Join Meeting</Text>
-                  </TouchableOpacity>
-
                 </View>
-              </>
+
+                <View style={styles.sessionDivider} />
+
+                <View style={styles.sessionTimeRow}>
+                  <View style={styles.sessionLabelIconGroup}>
+                    <Ionicons name="time-outline" size={16} color={C.muted} />
+                    <Text style={styles.sessionTimeLabel}>Time</Text>
+                  </View>
+                  <Text style={styles.sessionTime}>
+                    {session.start} – {session.end}
+                  </Text>
+                </View>
+
+                <View style={styles.sessionTimeRow}>
+                  <View style={styles.sessionLabelIconGroup}>
+                    <Ionicons name="hourglass-outline" size={16} color={C.muted} />
+                    <Text style={styles.sessionTimeLabel}>Duration</Text>
+                  </View>
+                  <Text style={styles.sessionTime}>1 hour</Text>
+                </View>
+
+                <TouchableOpacity
+                  style={styles.joinBtn}
+                  onPress={() =>
+                    Alert.alert(
+                      "Joining Meeting",
+                      `Meeting with ${session.name} at ${session.start} — link coming soon.`
+                    )
+                  }
+                  activeOpacity={0.85}
+                >
+                  <Ionicons name="videocam-outline" size={20} color={C.white} />
+                  <Text style={styles.joinBtnText}>Join Meeting</Text>
+                </TouchableOpacity>
+
+              </View>
             ) : (
               <View style={styles.noSession}>
-                <Text style={styles.noSessionEmoji}>📭</Text>
+                <Ionicons name="calendar-clear-outline" size={40} color={C.muted} style={styles.noSessionIcon} />
                 <Text style={styles.noSessionText}>No session on this day.</Text>
               </View>
             )}
 
-            {/* close */}
             <TouchableOpacity
               style={styles.closeBtn}
               onPress={() => setModalVisible(false)}
@@ -274,74 +267,133 @@ export default function ScheduleMeetingScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.bg },
-  container: { flex: 1, paddingHorizontal: "7%" },
-
-  topBulb: { paddingTop: "4%", alignItems: "flex-start" },
-  bulb: { width: "8%", aspectRatio: 1, opacity: 0.5 },
+  root: { 
+    flex: 1, 
+    backgroundColor: C.bg 
+  },
+  container: { 
+    flex: 1, 
+    paddingHorizontal: "8%",
+    justifyContent: "center", // This centers the entire block vertically
+    paddingVertical: "5%",
+  },
 
   title: {
-    fontFamily: "OtomanopeeOne_400Regular",
-    fontSize: 30, color: C.burgundy,
-    marginTop: "4%", marginBottom: "1%",
+    fontFamily: "Ledger_400Regular",
+    fontSize: 32, 
+    color: C.burgundy,
+    textAlign: "center",
   },
+  
+  dividerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    paddingVertical: "4%",
+    marginBottom: "4%",
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: C.divider,
+  },
+  dividerIcon: {
+    paddingHorizontal: "3%",
+  },
+
   subtitle: {
     fontFamily: "Ledger_400Regular",
-    fontSize: 15, color: C.burgundy, opacity: 0.8, marginBottom: "3%",
-  },
-  monthLabel: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 13, color: C.muted,
-    textAlign: "center", marginBottom: "2%", fontStyle: "italic",
+    fontSize: 18, 
+    color: C.text, 
+    marginBottom: "4%",
+    fontWeight: "600",
   },
 
   // ── calendar ──
-  calendar: {
-    backgroundColor: C.calendarBg,
-    borderRadius: 18, overflow: "hidden", paddingBottom: "2%",
+  calendarCard: {
+    width: "100%",
+    backgroundColor: C.bg,
+    borderRadius: 16, 
+    borderWidth: 1,
+    borderColor: C.burgundy,
+    paddingVertical: "6%",
+    paddingHorizontal: "4%",
   },
-  calRow: { flexDirection: "row" },
-  calCell: {
-    flex: 1, aspectRatio: 1,
-    alignItems: "center", justifyContent: "center",
-    borderRightWidth: 0.5, borderBottomWidth: 0.5, borderColor: C.cellBorder,
+  calHeader: { 
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    paddingHorizontal: "4%",
+    marginBottom: "6%",
   },
-  dateCell: {},
-  todayCell: { backgroundColor: C.todayBg },
+  monthName: {
+    fontFamily: "Ledger_400Regular",
+    fontSize: 22,
+    color: C.burgundy,
+  },
+
+  calRow: { 
+    flexDirection: "row",
+    width: "100%",
+    paddingVertical: "1.5%",
+  },
+  calCellWrapper: {
+    width: "14.28%", 
+    alignItems: "center", 
+    justifyContent: "center",
+  },
   dayHeader: {
     fontFamily: "Ledger_400Regular",
-    fontSize: 13, color: C.white, fontWeight: "700", opacity: 0.9,
+    fontSize: 14, 
+    color: C.text, 
+  },
+  
+  dateCell: {
+    width: "75%",
+    aspectRatio: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 999, 
+  },
+  todayCell: { 
+    backgroundColor: C.burgundy,
   },
   dateText: {
     fontFamily: "Ledger_400Regular",
-    fontSize: 14, color: C.white, opacity: 0.9,
+    fontSize: 16, 
+    color: C.text, 
   },
-  todayText: { color: C.white, fontWeight: "700", opacity: 1 },
-  sessionDot: {
-    width: 5, height: 5, borderRadius: 3,
-    backgroundColor: C.sessionDot,
-    marginTop: 2,
+  todayText: { 
+    color: C.white, 
   },
 
-  // ── legend ──
-  legend: {
-    flexDirection: "row", alignItems: "center",
-    marginTop: "4%", gap: 8,
+  // ── back button ──
+  backBtnWrapper: {
+    width: "100%",
+    marginTop: "6%", // Converted from paddingTop to marginTop to flow with the layout properly
+    alignItems: "center",
   },
-  legendDot: {
-    width: 8, height: 8, borderRadius: 4,
-    backgroundColor: C.calendarBg,
-    borderWidth: 1.5, borderColor: C.burgundy,
+  backLink: { 
+    width: "100%",
+    backgroundColor: C.burgundy, 
+    borderRadius: 16, 
+    paddingVertical: "4.5%", 
+    alignItems: "center", 
+    justifyContent: "center",
   },
-  legendText: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 12, color: C.muted, fontStyle: "italic",
+  backLinkText: { 
+    fontFamily: "Ledger_400Regular", 
+    fontSize: 20, 
+    color: C.white, 
+    letterSpacing: 0.5 
   },
 
   // ── modal ──
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(58,32,32,0.5)",
+    backgroundColor: "rgba(94, 75, 75, 0.6)",
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: "8%",
@@ -350,7 +402,7 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: C.bg,
     borderRadius: 20,
-    padding: "7%",
+    padding: "8%",
     borderTopWidth: 4,
     borderTopColor: C.burgundy,
     shadowColor: C.burgundy,
@@ -360,17 +412,20 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   modalDate: {
-    fontFamily: "OtomanopeeOne_400Regular",
-    fontSize: 20, color: C.burgundy,
-    textAlign: "center", marginBottom: "5%",
+    fontFamily: "Ledger_400Regular",
+    fontSize: 22, 
+    color: C.burgundy,
+    textAlign: "center", 
+    marginBottom: "6%",
   },
 
   // ── session card ──
   sessionCard: {
+    width: "100%",
     backgroundColor: C.white,
     borderRadius: 16,
-    padding: "5%",
-    marginBottom: "5%",
+    padding: "6%",
+    marginBottom: "6%",
     shadowColor: C.text,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.07,
@@ -378,83 +433,107 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   sessionHeader: {
-    flexDirection: "row", alignItems: "center", gap: 14, marginBottom: "4%",
+    flexDirection: "row", 
+    alignItems: "center", 
+    marginBottom: "5%",
   },
   avatar: {
-    width: 46, height: 46, borderRadius: 23,
-    backgroundColor: "#f5ede6",
-    alignItems: "center", justifyContent: "center",
-    borderWidth: 1.5, borderColor: C.calendarBg,
+    width: 46, 
+    height: 46, 
+    borderRadius: 23,
+    backgroundColor: "#F4EDE6",
+    alignItems: "center", 
+    justifyContent: "center",
+    borderWidth: 1, 
+    borderColor: C.divider,
   },
-  avatarText: { fontSize: 22 },
+  sessionHeaderText: {
+    paddingLeft: "4%",
+  },
   sessionName: {
-    fontFamily: "OtomanopeeOne_400Regular",
-    fontSize: 18, color: C.text,
+    fontFamily: "Ledger_400Regular",
+    fontSize: 18, 
+    color: C.text,
   },
   sessionRole: {
     fontFamily: "Ledger_400Regular",
-    fontSize: 12, color: C.muted, fontStyle: "italic",
+    fontSize: 13, 
+    color: C.muted, 
+    fontStyle: "italic",
   },
   sessionDivider: {
-    height: 1, backgroundColor: "#f0e8df", marginBottom: "4%",
+    width: "100%",
+    height: 1, 
+    backgroundColor: "#F0E8DF", 
+    marginBottom: "5%",
   },
   sessionTimeRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "3%",
+    marginBottom: "4%",
+  },
+  sessionLabelIconGroup: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   sessionTimeLabel: {
     fontFamily: "Ledger_400Regular",
-    fontSize: 13, color: C.muted,
+    fontSize: 14, 
+    color: C.muted,
+    paddingLeft: "2%",
   },
   sessionTime: {
     fontFamily: "Ledger_400Regular",
-    fontSize: 14, color: C.text, fontWeight: "700",
+    fontSize: 15, 
+    color: C.text, 
+    fontWeight: "700",
   },
   joinBtn: {
+    width: "100%",
     backgroundColor: C.burgundy,
     borderRadius: 12,
-    paddingVertical: "4%",
+    paddingVertical: "4.5%",
+    flexDirection: "row",
+    justifyContent: "center",
     alignItems: "center",
-    marginTop: "3%",
-    shadowColor: C.burgundy,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 3,
+    marginTop: "4%",
   },
   joinBtnText: {
     fontFamily: "Ledger_400Regular",
-    fontSize: 16, color: C.white, letterSpacing: 0.3,
+    fontSize: 16, 
+    color: C.white, 
+    letterSpacing: 0.3,
+    paddingLeft: "2%",
   },
 
   // ── no session ──
   noSession: {
-    alignItems: "center", paddingVertical: "8%",
+    alignItems: "center", 
+    paddingVertical: "10%",
   },
-  noSessionEmoji: { fontSize: 36, marginBottom: 10 },
+  noSessionIcon: { 
+    marginBottom: "3%",
+  },
   noSessionText: {
     fontFamily: "Ledger_400Regular",
-    fontSize: 14, color: C.muted, fontStyle: "italic",
+    fontSize: 15, 
+    color: C.muted, 
+    fontStyle: "italic",
   },
 
   // ── close button ──
   closeBtn: {
+    width: "100%",
     backgroundColor: C.burgundy,
     borderRadius: 40,
-    paddingVertical: "4%",
+    paddingVertical: "4.5%",
     alignItems: "center",
-    shadowColor: C.burgundy,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
   },
   closeBtnText: {
     fontFamily: "Ledger_400Regular",
-    fontSize: 17, color: C.white, letterSpacing: 0.5,
+    fontSize: 17, 
+    color: C.white, 
+    letterSpacing: 0.5,
   },
-  backLink: { backgroundColor: C.burgundy, borderRadius: 40, paddingVertical: 18, alignItems: "center", shadowColor: C.burgundy, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 4 },
-  backLinkText: { fontFamily: "Ledger_400Regular", fontSize: 20, color: C.white, letterSpacing: 0.5 },
 });
