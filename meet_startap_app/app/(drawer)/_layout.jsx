@@ -179,6 +179,10 @@ export default function DrawerLayout() {
           options={{ drawerItemStyle: { display: "none" } }}
         />
         <Drawer.Screen
+          name="therapist-home"
+          options={{ drawerItemStyle: { display: "none" }, title: "Therapist Home" }}
+        />
+        <Drawer.Screen
           name="old stuff/index(old)"
           options={{ drawerItemStyle: { display: "none" } }}
         />

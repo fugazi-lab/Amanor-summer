@@ -111,8 +111,10 @@ export default function TherapistAuthScreen() {
       if (!therapist) { setErrorMsg("No therapist account found. Try signing up!"); return; }
       if (therapist.password !== password) { setErrorMsg("Wrong password. Try again."); return; }
       setUsername(""); setPassword("");
-      // navigate to therapist home — create this route when ready
-      router.replace({ pathname: "/therapist-home", params: { username: therapist.username } });
+      router.replace({
+        pathname: "/(drawer)/therapist-home",
+        params: { username: therapist.username },
+      });
     } catch (err) {
       console.error("Therapist login error:", JSON.stringify(err));
       if (err.code === 401) setErrorMsg("Permission denied. Check Appwrite permissions.");
@@ -152,7 +154,14 @@ export default function TherapistAuthScreen() {
       const created = username.trim();
       setUsername(""); setPassword(""); setPhone(""); setCertImage(null);
       Alert.alert("Welcome!", "Therapist account created.", [
-        { text: "Let's go", onPress: () => router.replace({ pathname: "/therapist-home", params: { username: created } }) },
+        {
+          text: "Let's go",
+          onPress: () =>
+            router.replace({
+              pathname: "/(drawer)/therapist-home",
+              params: { username: created },
+            }),
+        },
       ]);
     } catch (err) {
       console.error("Therapist signup error:", JSON.stringify(err));
