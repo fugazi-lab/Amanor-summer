@@ -1,5 +1,6 @@
 /*
     This is the layout for the drawer navigation.
+    provides a consistent navigation experience across the app.
 */
 
 import { Drawer } from "expo-router/drawer";
@@ -177,6 +178,10 @@ export default function DrawerLayout() {
         <Drawer.Screen
           name="auth-therapist"
           options={{ drawerItemStyle: { display: "none" } }}
+        />
+        <Drawer.Screen
+          name="therapist-home"
+          options={{ drawerItemStyle: { display: "none" }, title: "Therapist Home" }}
         />
         <Drawer.Screen
           name="old stuff/index(old)"
