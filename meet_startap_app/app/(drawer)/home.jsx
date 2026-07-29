@@ -1,7 +1,6 @@
 /*
     home.jsx — AmanOr feature hub.
-    Redesigned to match the new brand mockup:
-    top bar (menu / brand / profile) → headline → two hero cards
+    top bar (brand / profile) → headline → two hero cards
     → "More Resources" divider → resource cards → bottom nav.
     Scrolls vertically so every text element remains fully visible.
 
@@ -13,6 +12,7 @@
     they're not in use right now — easy to wire back in later if needed.
 */
 
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Ledger_400Regular } from "@expo-google-fonts/ledger";
 import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
 import { useFonts } from "expo-font";
@@ -22,9 +22,9 @@ import {
   Alert,
   SafeAreaView,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 
@@ -44,10 +44,82 @@ const C = {
   divider:     "#C4B8A8",
 };
 
+// hero cards — icon + copy + route in one place
+const HERO_CARDS = [
+  {
+    key: "record",
+    bg: C.roseSoft,
+    iconBg: C.roseCircle,
+    Icon: Ionicons,
+    iconName: "mic-outline",
+    title: "Record & Protect",
+    desc: "Set a trigger word and record incidents securely.",
+    btnBg: C.rose,
+    btnText: "Set Up Recording",
+    route: "/(drawer)/Recording2",
+  },
+  {
+    key: "support",
+    bg: C.tan,
+    iconBg: C.tanCircle,
+    Icon: Ionicons,
+    iconName: "heart-outline",
+    title: "Emotional Support",
+    desc: "Talk to others who understand. You're not alone.",
+    btnBg: C.brown,
+    btnText: "Join Support Network",
+    route: "/(drawer)/emotional-help",
+  },
+];
+
+// resource cards — icon + copy + route in one place
+const RESOURCE_CARDS = [
+  {
+    key: "legal",
+    Icon: MaterialCommunityIcons,
+    iconName: "scale-balance",
+    title: "Legal Rights",
+    desc: "Learn your rights at work",
+    route: "/(drawer)/legal-intro",
+  },
+  {
+    key: "report",
+    Icon: Ionicons,
+    iconName: "business-outline",
+    title: "Report To Company",
+    desc: "File a complaint safely",
+    route: "/(drawer)/report",
+  },
+  {
+    key: "evidence",
+    Icon: Ionicons,
+    iconName: "folder-outline",
+    title: "Saved Evidence",
+    desc: "Access all your evidence",
+    route: "/(drawer)/files",
+    withUsername: true,
+  },
+];
+
+// side nav tabs (excludes the raised center "Report" button, handled separately)
+const NAV_TABS = [
+  { key: "home", iconName: "home", label: "Home", color: "rose" },
+  { key: "support", iconName: "people-outline", label: "Support", route: "/(drawer)/emotional-help", color: "muted" },
+  { key: "resources", iconName: "book-outline", label: "Resources", route: "/(drawer)/legal-intro", color: "muted" },
+  { key: "profile", iconName: "person-outline", label: "Profile", route: "/(drawer)/Profile", color: "muted" },
+];
+
 export default function HomeScreen() {
   const router = useRouter();
   const { username } = useLocalSearchParams();
   const user = username || "anon";
+  const { width, height } = useWindowDimensions();
+
+  // clamp scaling width to a phone-like max so proportions stay consistent
+  // on wide viewports (pc / tablet / web) instead of ballooning with them
+  const layoutWidth = Math.min(width, 480);
+  const wp = (p) => (layoutWidth * p) / 100;
+  const hp = (p) => (height * p) / 100;
 
   const [fontsLoaded] = useFonts({
     OtomanopeeOne_400Regular,
@@ -56,7 +128,7 @@ export default function HomeScreen() {
 
   if (!fontsLoaded) {
     return (
-      <SafeAreaView style={[styles.root, { justifyContent: "center", alignItems: "center" }]}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: C.bg, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator color={C.rose} />
       </SafeAreaView>
     );
@@ -72,332 +144,267 @@ export default function HomeScreen() {
   const go = (pathname, params = {}) => router.push({ pathname, params });
 
   return (
-    <SafeAreaView style={styles.root}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }}>
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.body}
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          width: "100%",
+          maxWidth: 480,
+          alignSelf: "center",
+          paddingHorizontal: wp(4.5),
+          paddingTop: hp(3.2),
+          paddingBottom: hp(13.5),
+        }}
         showsVerticalScrollIndicator={false}
       >
 
         {/* ── TOP BAR ── */}
-        <View style={styles.topBar}>
-          <View style={styles.topBarSpacer} />
+        <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: hp(1.2) }}>
+          <View style={{ width: wp(8), height: wp(8) }} />
 
-          <View style={styles.brandWrap}>
-            <Text style={styles.brandName}>Amanor</Text>
-            <Text style={styles.tagline}>Empower women, change worlds.</Text>
+          <View style={{ flex: 1, alignItems: "center" }}>
+            <Text style={{ fontFamily: "OtomanopeeOne_400Regular", fontSize: wp(6.5), color: C.text }}>
+              Amanor
+            </Text>
+            <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(2.9), color: C.rose, marginTop: hp(0.15) }}>
+              Empower women, change worlds.
+            </Text>
           </View>
 
-          <TouchableOpacity onPress={() => go("/(drawer)/Profile")} style={styles.profileCircle}>
-            <Text style={styles.profileIcon}>👤</Text>
+          <TouchableOpacity
+            onPress={() => go("/(drawer)/Profile")}
+            style={{
+              width: wp(8),
+              height: wp(8),
+              borderRadius: wp(4),
+              borderWidth: 1.5,
+              borderColor: C.rose,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Ionicons name="person-outline" size={wp(4)} color={C.rose} />
           </TouchableOpacity>
         </View>
 
         {/* ── HEADLINE ── */}
-        <Text style={styles.headline}>
+        <Text
+          style={{
+            fontFamily: "OtomanopeeOne_400Regular",
+            fontSize: wp(4.75),
+            lineHeight: wp(6.25),
+            color: C.text,
+            textAlign: "center",
+            marginTop: hp(1.2),
+            marginBottom: hp(1.7),
+          }}
+        >
           You&apos;re not alone. We&apos;re here to support you.
         </Text>
 
         {/* ── HERO CARDS ── */}
-        <View style={styles.heroRow}>
-
-          {/* Record & Protect → Recording2.jsx */}
-          <View style={[styles.heroCard, { backgroundColor: C.roseSoft }]}>
-            <View style={[styles.heroIconCircle, { backgroundColor: C.roseCircle }]}>
-              <Text style={styles.heroIcon}>🎙️</Text>
-            </View>
-            <Text style={styles.heroTitle}>Record & Protect</Text>
-            <Text style={styles.heroDesc}>Set a trigger word and record incidents securely.</Text>
-            <TouchableOpacity
-              style={[styles.heroBtn, { backgroundColor: C.rose }]}
-              onPress={() => go("/(drawer)/Recording2")}
-              activeOpacity={0.85}
+        <View style={{ flexDirection: "row", gap: wp(2.5), marginBottom: hp(1.7) }}>
+          {HERO_CARDS.map(({ key, bg, iconBg, Icon, iconName, title, desc, btnBg, btnText, route }) => (
+            <View
+              key={key}
+              style={{
+                flex: 1,
+                backgroundColor: bg,
+                borderRadius: wp(4.5),
+                padding: wp(3.5),
+                alignItems: "center",
+                justifyContent: "center",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.08,
+                shadowRadius: 8,
+                elevation: 3,
+              }}
             >
-              <Text style={styles.heroBtnText}>Set Up Recording</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Emotional Support → emotional-help.jsx */}
-          <View style={[styles.heroCard, { backgroundColor: C.tan }]}>
-            <View style={[styles.heroIconCircle, { backgroundColor: C.tanCircle }]}>
-              <Text style={styles.heroIcon}>🫂</Text>
+              <View
+                style={{
+                  width: wp(18),
+                  height: wp(18),
+                  borderRadius: wp(9),
+                  backgroundColor: iconBg,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: hp(1.5),
+                }}
+              >
+                <Icon name={iconName} size={wp(7.5)} color={C.text} />
+              </View>
+              <Text
+                style={{
+                  fontFamily: "OtomanopeeOne_400Regular",
+                  fontSize: wp(4.25),
+                  color: C.text,
+                  textAlign: "center",
+                  marginBottom: hp(0.75),
+                }}
+              >
+                {title}
+              </Text>
+              <Text
+                style={{
+                  fontFamily: "Ledger_400Regular",
+                  fontSize: wp(3.25),
+                  color: C.muted,
+                  textAlign: "center",
+                  lineHeight: wp(4.25),
+                  marginBottom: hp(1.7),
+                }}
+              >
+                {desc}
+              </Text>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: btnBg,
+                  borderRadius: wp(7.5),
+                  paddingVertical: hp(1.6),
+                  paddingHorizontal: wp(3),
+                  alignItems: "center",
+                  width: "100%",
+                }}
+                onPress={() => go(route)}
+                activeOpacity={0.85}
+              >
+                <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.5), color: C.white, textAlign: "center" }}>
+                  {btnText}
+                </Text>
+              </TouchableOpacity>
             </View>
-            <Text style={styles.heroTitle}>Emotional Support</Text>
-            <Text style={styles.heroDesc}>Talk to others who understand. You&apos;re not alone.</Text>
-            <TouchableOpacity
-              style={[styles.heroBtn, { backgroundColor: C.brown }]}
-              onPress={() => go("/(drawer)/emotional-help")}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.heroBtnText}>Join Support Network</Text>
-            </TouchableOpacity>
-          </View>
-
+          ))}
         </View>
 
         {/* ── MORE RESOURCES DIVIDER ── */}
-        <View style={styles.dividerRow}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>More Resources</Text>
-          <View style={styles.dividerLine} />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: wp(2.5), marginBottom: hp(1.5) }}>
+          <View style={{ flex: 1, height: 1, backgroundColor: C.divider }} />
+          <Text style={{ fontFamily: "OtomanopeeOne_400Regular", fontSize: wp(3.25), color: C.text }}>
+            More Resources
+          </Text>
+          <View style={{ flex: 1, height: 1, backgroundColor: C.divider }} />
         </View>
 
         {/* ── RESOURCE CARDS ── */}
-        <View style={styles.resourceRow}>
-
-          <TouchableOpacity
-            style={styles.resourceCard}
-            onPress={() => go("/(drawer)/legal-intro")}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.resourceIcon}>⚖️</Text>
-            <Text style={styles.resourceTitle}>Legal Rights</Text>
-            <Text style={styles.resourceDesc}>Learn your rights at work</Text>
-            <Text style={styles.resourceArrow}>→</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.resourceCard}
-            onPress={() => go("/(drawer)/report")}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.resourceIcon}>🏢</Text>
-            <Text style={styles.resourceTitle}>Report To Company</Text>
-            <Text style={styles.resourceDesc}>File a complaint safely</Text>
-            <Text style={styles.resourceArrow}>→</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.resourceCard}
-            onPress={() => go("/(drawer)/files", { username: user })}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.resourceIcon}>🗂️</Text>
-            <Text style={styles.resourceTitle}>Saved Evidence</Text>
-            <Text style={styles.resourceDesc}>Access all your evidence</Text>
-            <Text style={styles.resourceArrow}>→</Text>
-          </TouchableOpacity>
-
+        <View style={{ flexDirection: "row", gap: wp(2.5), marginBottom: hp(1.5) }}>
+          {RESOURCE_CARDS.map(({ key, Icon, iconName, title, desc, route, withUsername }) => (
+            <TouchableOpacity
+              key={key}
+              style={{
+                flex: 1,
+                backgroundColor: C.cardTan,
+                borderRadius: wp(3.5),
+                padding: wp(3),
+                justifyContent: "center",
+              }}
+              onPress={() => go(route, withUsername ? { username: user } : {})}
+              activeOpacity={0.85}
+            >
+              <Icon name={iconName} size={wp(4.5)} color={C.brown} style={{ marginBottom: hp(0.75) }} />
+              <Text
+                style={{
+                  fontFamily: "OtomanopeeOne_400Regular",
+                  fontSize: wp(3),
+                  lineHeight: wp(3.75),
+                  color: C.text,
+                  marginBottom: hp(0.6),
+                }}
+              >
+                {title}
+              </Text>
+              <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(2.6), lineHeight: wp(3.5), color: C.muted }}>
+                {desc}
+              </Text>
+              <Ionicons
+                name="chevron-forward"
+                size={wp(3.25)}
+                color={C.brown}
+                style={{ alignSelf: "flex-end", marginTop: hp(1.2) }}
+              />
+            </TouchableOpacity>
+          ))}
         </View>
 
       </ScrollView>
 
       {/* ── BOTTOM NAV ── */}
-      <View style={styles.navBar}>
-        <TouchableOpacity style={styles.navTab} activeOpacity={0.7}>
-          <Text style={[styles.navIcon, { color: C.rose }]}>🏠</Text>
-          <Text style={[styles.navLabel, { color: C.rose }]}>Home</Text>
-        </TouchableOpacity>
+      {/* outer: just anchors full-bleed to the bottom edge, no visual styling */}
+      <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, zIndex: 10 }}>
+        {/* inner: the actual nav bar — this is what gets capped + centered */}
+        <View
+          style={{
+            width: "100%",
+            maxWidth: 480,
+            alignSelf: "center",
+            flexDirection: "row",
+            alignItems: "flex-start",
+            backgroundColor: C.navBg,
+            borderTopWidth: 1,
+            borderTopColor: C.divider,
+            paddingTop: hp(1.2),
+            paddingBottom: hp(2.5),
+            paddingHorizontal: wp(1.5),
+          }}
+        >
+        {NAV_TABS.slice(0, 2).map(({ key, iconName, label, route, color }) => (
+          <TouchableOpacity
+            key={key}
+            style={{ flex: 1, alignItems: "center", gap: hp(0.5) }}
+            onPress={route ? () => go(route) : undefined}
+            activeOpacity={0.7}
+          >
+            <Ionicons name={iconName} size={wp(5)} color={color === "rose" ? C.rose : C.muted} />
+            <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(2.75), color: color === "rose" ? C.rose : C.muted }}>
+              {label}
+            </Text>
+          </TouchableOpacity>
+        ))}
 
-        <TouchableOpacity style={styles.navTab} onPress={() => go("/(drawer)/emotional-help")} activeOpacity={0.7}>
-          <Text style={styles.navIcon}>👥</Text>
-          <Text style={styles.navLabel}>Support</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.navReportTab} onPress={() => go("/(drawer)/report")} activeOpacity={0.85}>
-          <View style={styles.navReportCircle}>
-            <Text style={styles.navReportIcon}>＋</Text>
+        {/* Raised center Report button */}
+        <TouchableOpacity
+          style={{ flex: 1, alignItems: "center", marginTop: -hp(3.2) }}
+          onPress={() => go("/(drawer)/report")}
+          activeOpacity={0.85}
+        >
+          <View
+            style={{
+              width: wp(13),
+              height: wp(13),
+              borderRadius: wp(6.5),
+              backgroundColor: C.rose,
+              alignItems: "center",
+              justifyContent: "center",
+              shadowColor: C.rose,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.35,
+              shadowRadius: 8,
+              elevation: 5,
+            }}
+          >
+            <Ionicons name="add" size={wp(6.5)} color={C.white} />
           </View>
-          <Text style={[styles.navLabel, { color: C.rose, marginTop: 6 }]}>Report</Text>
+          <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(2.75), color: C.rose, marginTop: hp(0.75) }}>
+            Report
+          </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navTab} onPress={() => go("/(drawer)/legal-intro")} activeOpacity={0.7}>
-          <Text style={styles.navIcon}>📖</Text>
-          <Text style={styles.navLabel}>Resources</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.navTab} onPress={() => go("/(drawer)/Profile")} activeOpacity={0.7}>
-          <Text style={styles.navIcon}>👤</Text>
-          <Text style={styles.navLabel}>Profile</Text>
-        </TouchableOpacity>
+        {NAV_TABS.slice(2).map(({ key, iconName, label, route, color }) => (
+          <TouchableOpacity
+            key={key}
+            style={{ flex: 1, alignItems: "center", gap: hp(0.5) }}
+            onPress={route ? () => go(route) : undefined}
+            activeOpacity={0.7}
+          >
+            <Ionicons name={iconName} size={wp(5)} color={color === "rose" ? C.rose : C.muted} />
+            <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(2.75), color: color === "rose" ? C.rose : C.muted }}>
+              {label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+        </View>
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.bg },
-  scrollView: { flex: 1 },
-  body: {
-    flexGrow: 1,
-    paddingHorizontal: 18,
-    paddingTop: 26,
-    paddingBottom: 110,
-  },
-
-  // ── top bar ──
-  topBar: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    marginBottom: 10,
-  },
-  topBarSpacer: { width: 32, height: 32 },
-  brandWrap: { flex: 1, alignItems: "center" },
-  brandName: {
-    fontFamily: "OtomanopeeOne_400Regular",
-    fontSize: 26,
-    color: C.text,
-  },
-  tagline: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 11.5,
-    color: C.rose,
-    marginTop: 1,
-  },
-  profileCircle: {
-    width: 32, height: 32, borderRadius: 16,
-    borderWidth: 1.5, borderColor: C.rose,
-    alignItems: "center", justifyContent: "center",
-  },
-  profileIcon: { fontSize: 14 },
-
-  // ── headline ──
-  headline: {
-    fontFamily: "OtomanopeeOne_400Regular",
-    fontSize: 19,
-    lineHeight: 25,
-    color: C.text,
-    textAlign: "center",
-    marginTop: 10,
-    marginBottom: 14,
-  },
-
-  // ── hero cards ──
-  heroRow: {
-  flexDirection: "row",
-  gap: 10,
-  marginBottom: 14,
-  },
-
-  heroCard: {
-    flex: 1,
-    borderRadius: 18,
-    padding: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  heroIconCircle: {
-    width: 72, height: 72, borderRadius: 36,
-    alignItems: "center", justifyContent: "center",
-    marginBottom: 12,
-  },
-  heroIcon: { fontSize: 30 },
-  heroTitle: {
-    fontFamily: "OtomanopeeOne_400Regular",
-    fontSize: 17,
-    color: C.text,
-    textAlign: "center",
-    marginBottom: 6,
-  },
-  heroDesc: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 13,
-    color: C.muted,
-    textAlign: "center",
-    lineHeight: 17,
-    marginBottom: 14,
-  },
-  heroBtn: {
-    borderRadius: 30,
-    paddingVertical: 13,
-    paddingHorizontal: 12,
-    alignItems: "center",
-    width: "100%",
-  },
-  heroBtnText: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 14,
-    color: C.white,
-    textAlign: "center",
-  },
-
-  // ── divider ──
-  dividerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 12,
-  },
-  dividerLine: { flex: 1, height: 1, backgroundColor: C.divider },
-  dividerText: {
-    fontFamily: "OtomanopeeOne_400Regular",
-    fontSize: 13,
-    color: C.text,
-  },
-
-  // ── resource cards ──
-  resourceRow: {
-    flexDirection: "row",
-    gap: 10,
-    marginBottom: 12,
-  },
-  resourceCard: {
-    flex: 1,
-    backgroundColor: C.cardTan,
-    borderRadius: 14,
-    padding: 12,
-    justifyContent: "center",
-  },
-  resourceIcon: { fontSize: 18, marginBottom: 6 },
-  resourceTitle: {
-    fontFamily: "OtomanopeeOne_400Regular",
-    fontSize: 12,
-    lineHeight: 15,
-    color: C.text,
-    marginBottom: 5,
-  },
-  resourceDesc: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 10.5,
-    lineHeight: 14,
-    color: C.muted,
-  },
-  resourceArrow: {
-    fontSize: 13,
-    color: C.brown,
-    alignSelf: "flex-end",
-    marginTop: 10,
-  },
-
-  // ── bottom nav ──
-  navBar: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    backgroundColor: C.navBg,
-    borderTopWidth: 1,
-    borderTopColor: C.divider,
-    paddingTop: 10,
-    paddingBottom: 20,
-    paddingHorizontal: 6,
-    zIndex: 10,
-  },
-  navTab: { flex: 1, alignItems: "center", gap: 4 },
-  navIcon: { fontSize: 20, color: C.muted },
-  navLabel: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 11,
-    color: C.muted,
-  },
-  navReportTab: { flex: 1, alignItems: "center", marginTop: -26 },
-  navReportCircle: {
-    width: 52, height: 52, borderRadius: 26,
-    backgroundColor: C.rose,
-    alignItems: "center", justifyContent: "center",
-    shadowColor: C.rose,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  navReportIcon: { fontSize: 24, color: C.white, fontWeight: "700" },
-});

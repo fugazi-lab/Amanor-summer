@@ -7,6 +7,7 @@
     fonts: Otomanopee One + Ledger
 */
 
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Ledger_400Regular } from "@expo-google-fonts/ledger";
 import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
 import { useFonts } from "expo-font";
@@ -15,22 +16,65 @@ import {
   ActivityIndicator,
   Image,
   SafeAreaView,
-  StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View
 } from "react-native";
 
 const C = {
-  bg:       "#f5f0e0",
-  burgundy: "#7a2035",
-  text:     "#3a2020",
-  muted:    "#9a8070",
-  white:    "#ffffff",
+  bg:         "#f5f0e0",
+  burgundy:   "#7a2035",
+  text:       "#3a2020",
+  muted:      "#9a8070",
+  white:      "#ffffff",
+  cardBg:     "#fbf3ee",
+  cardBorder: "#e9d6ce",
+  iconBg:     "#f2d9d9",
 };
+
+// role config — icon + copy in one place so cards stay in sync
+const ROLES = [
+  {
+    key: "therapist",
+    route: "/auth-therapist",
+    title: "A Therapist",
+    desc: "Provide Professional Emotional Support To Women",
+    Icon: MaterialCommunityIcons,
+    iconName: "account-heart-outline",
+  },
+  {
+    key: "woman",
+    route: "/auth",
+    title: "A Woman",
+    desc: "Get Support And Document Evidence",
+    Icon: Ionicons,
+    iconName: "woman-outline",
+  },
+  {
+    key: "company",
+    route: "/auth-company",
+    title: "A Company",
+    desc: "Support Your Employees",
+    Icon: Ionicons,
+    iconName: "business-outline",
+  },
+];
 
 export default function RolePickScreen() {
   const router = useRouter();
+  const { width, height } = useWindowDimensions();
+
+  // clamp the width used for scaling to a phone-like max. without this,
+  // on a wide viewport (pc / tablet / web) raw width is huge and every
+  // element scales up out of proportion — this keeps the ratio consistent
+  // across devices while the outer container below stays centered.
+  const layoutWidth = Math.min(width, 480);
+
+  // percentage-of-screen helpers — every size below derives from these
+  // so the whole layout scales with the device instead of using fixed px
+  const wp = (p) => (layoutWidth * p) / 100;
+  const hp = (p) => (height * p) / 100;
 
   const [fontsLoaded] = useFonts({
     OtomanopeeOne_400Regular,
@@ -39,150 +83,101 @@ export default function RolePickScreen() {
 
   if (!fontsLoaded) {
     return (
-      <SafeAreaView style={[styles.root, { justifyContent: "center", alignItems: "center" }]}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: C.bg, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator color={C.burgundy} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.root}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }}>
+      <View style={{ flex: 1, width: "100%", maxWidth: 480, alignSelf: "center", paddingHorizontal: wp(7), justifyContent: "center" }}>
 
-      <View style={styles.container}>
-
-        {/* ── TITLE ── */}
-        <View style={styles.titleSection}>
-          <Text style={styles.title}>Who are{"\n"}you?</Text>
-          <View style={styles.rule} />
-        </View>
-
-        {/* ── BUTTONS ── */}
-        <View style={styles.buttonsSection}>
-
-          {/* A Therapist */}
-          <TouchableOpacity
-            style={styles.optionBtn}
-            onPress={() => router.replace("/auth-therapist")}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.optionTitle}>A Therapist</Text>
-            <Text style={styles.optionDesc}>Provide Professional Emotional Support To Women</Text>
-          </TouchableOpacity>
-
-          {/* A Woman */}
-          <TouchableOpacity
-            style={styles.optionBtn}
-            onPress={() => router.replace("/auth")}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.optionTitle}>A Woman</Text>
-            <Text style={styles.optionDesc}>Get Support And Document Evidence</Text>
-          </TouchableOpacity>
-
-          {/* A Company */}
-          <TouchableOpacity
-            style={styles.optionBtn}
-            onPress={() => router.replace("/auth-company")}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.optionTitle}>A Company</Text>
-            <Text style={styles.optionDesc}>Support Your Employees</Text>
-          </TouchableOpacity>
-
-        </View>
-
-        {/* ── BOTTOM LOGO ── */}
-        <View style={styles.bottomLogoWrap}>
+        {/* ── LOGO ── */}
+        <View style={{ alignItems: "center", marginBottom: hp(2) }}>
           <Image
             source={require("../../assets/bulblogo.png")}
-            style={styles.bottomLogo}
+            style={{ width: wp(30), height: wp(30) }}
             resizeMode="contain"
           />
         </View>
 
-      </View>
+        {/* ── TITLE ── */}
+        <View style={{ alignItems: "center", marginBottom: hp(4) }}>
+          <Text
+            style={{
+              fontFamily: "OtomanopeeOne_400Regular",
+              fontSize: wp(10.5),
+              color: C.burgundy,
+              lineHeight: wp(12.5),
+              textAlign: "center",
+            }}
+          >
+            Who are you?
+          </Text>
+        </View>
 
+        {/* ── BUTTONS ── */}
+        <View style={{ gap: hp(2.5) }}>
+          {ROLES.map(({ key, route, title, desc, Icon, iconName }) => (
+            <TouchableOpacity
+              key={key}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                width: "100%",
+                backgroundColor: C.cardBg,
+                borderColor: C.cardBorder,
+                borderWidth: 1,
+                borderRadius: wp(6),
+                paddingVertical: hp(2.2),
+                paddingHorizontal: wp(5),
+              }}
+              onPress={() => router.replace(route)}
+              activeOpacity={0.85}
+            >
+              <View
+                style={{
+                  width: wp(15),
+                  height: wp(15),
+                  borderRadius: wp(7.5),
+                  backgroundColor: C.iconBg,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginRight: wp(4.5),
+                }}
+              >
+                <Icon name={iconName} size={wp(7.5)} color={C.burgundy} />
+              </View>
+
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    fontFamily: "OtomanopeeOne_400Regular",
+                    fontSize: wp(5),
+                    color: C.burgundy,
+                    marginBottom: hp(0.6),
+                  }}
+                >
+                  {title}
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: "Ledger_400Regular",
+                    fontSize: wp(3.4),
+                    color: C.muted,
+                    letterSpacing: 0.2,
+                    lineHeight: wp(4.4),
+                  }}
+                >
+                  {desc}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+      </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: C.bg,
-  },
-
-  container: {
-  flex: 1,
-  paddingHorizontal: "7%",
-},
-
-titleSection: {
-  height: "20%",
-  justifyContent: "center",
-  alignItems: "center",
-},
-
-title: {
-  fontFamily: "OtomanopeeOne_400Regular",
-  fontSize: 40,
-  color: C.burgundy,
-  lineHeight: 50,
-  textAlign: "center",
-},
-
-rule: {
-  marginTop: "6%",
-  height: 1.5,
-  backgroundColor: C.burgundy,
-  width: "100%",
-  opacity: 0.4,
-},
-
-buttonsSection: {
-  height: "62%",
-  justifyContent: "center",
-  alignItems: "center",
-  gap: "5%",
-},
-
-optionBtn: {
-  width: "92%",
-  backgroundColor: C.burgundy,
-  borderRadius: 20,
-  paddingVertical: "5%",
-  alignItems: "center",
-},
-
-optionTitle: {
-    fontFamily: "OtomanopeeOne_400Regular",
-    fontSize: 24,
-    color: C.white,
-    marginBottom: 6,
-    opacity: 0.95,
-},
-
-optionDesc: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 12,
-    color: C.white,
-    opacity: 0.7,
-    letterSpacing: 0.3,
-    textAlign: "center",
-    paddingHorizontal: 10,
-},
-
-bottomLogoWrap: {
-  position: "absolute",
-  right: "5%",
-  bottom: "4%",
-  width: "12%",
-  aspectRatio: 1,
-},
-
-bottomLogo: {
-  width: "100%",
-  height: "100%",
-  opacity: 0.35,
-},
-});

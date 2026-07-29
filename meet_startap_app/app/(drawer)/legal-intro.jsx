@@ -1,9 +1,10 @@
 /*
     legal-intro.jsx — your legal rights landing page.
-    two options: what is harassment, and your rights & options.
+    cards route to: what is harassment, your rights, what employers must do.
     fonts: Otomanopee One + Ledger
 */
 
+import { Ionicons } from "@expo/vector-icons";
 import { Ledger_400Regular } from "@expo-google-fonts/ledger";
 import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
 import { useFonts } from "expo-font";
@@ -12,24 +13,56 @@ import {
   ActivityIndicator,
   Image,
   SafeAreaView,
-  StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View
 } from "react-native";
 
 const C = {
-  bg:          "#F5F0E4",
-  burgundy:    "#7a2035",
-  text:        "#2C1810",
-  muted:       "#6B5B4E",
-  btnPink:     "#C4909A",   // rosy pink — first button
-  btnBrown:    "#6B4F3A",   // warm dark brown — second button
-  white:       "#ffffff",
+  bg:         "#F5F0E4",
+  burgundy:   "#7a2035",
+  text:       "#2C1810",
+  muted:      "#6B5B4E",
+  cardBg:     "#fbf3ee",
+  cardBorder: "#e9d6ce",
+  iconBg:     "#f2d9d9",
+  chevron:    "#c9a9a9",
+  backBg:     "#f6e2e5",
+  white:      "#ffffff",
 };
+
+// card config — icon + copy + route in one place
+const ITEMS = [
+  {
+    key: "what",
+    route: "/(drawer)/legal-what",
+    label: "What Is Workplace\nSexual Harassment?",
+    icon: "help-circle-outline",
+  },
+  {
+    key: "rights",
+    route: "/(drawer)/legal",
+    label: "Your Rights",
+    icon: "shield-checkmark-outline",
+  },
+  {
+    key: "employer",
+    route: "/(drawer)/legal-employer",
+    label: "What Employers Must Do",
+    icon: "business-outline",
+  },
+];
 
 export default function LegalIntroScreen() {
   const router = useRouter();
+  const { width, height } = useWindowDimensions();
+
+  // clamp scaling width to a phone-like max so proportions stay consistent
+  // on wide viewports (pc / tablet / web) instead of ballooning with them
+  const layoutWidth = Math.min(width, 480);
+  const wp = (p) => (layoutWidth * p) / 100;
+  const hp = (p) => (height * p) / 100;
 
   const [fontsLoaded] = useFonts({
     OtomanopeeOne_400Regular,
@@ -38,179 +71,133 @@ export default function LegalIntroScreen() {
 
   if (!fontsLoaded) {
     return (
-      <SafeAreaView style={[styles.root, { justifyContent: "center", alignItems: "center" }]}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: C.bg, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator color={C.burgundy} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.root}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }}>
+      <View style={{ flex: 1, width: "100%", maxWidth: 480, alignSelf: "center", paddingHorizontal: wp(7), justifyContent: "center" }}>
 
-      {/* ── BULB TOP LEFT ── */}
-      <View style={styles.topBulb}>
-        <Image
-          source={require("../../assets/bulblogo.png")}
-          style={styles.bulb}
-          resizeMode="contain"
-        />
+        {/* ── LOGO LOCKUP ── */}
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
+          <Image
+            source={require("../../assets/bulblogo.png")}
+            style={{ width: wp(20), height: wp(20), marginRight: wp(0) }}
+            resizeMode="contain"
+          />
+          <Text style={{ fontFamily: "OtomanopeeOne_400Regular", fontSize: wp(6.5), color: C.burgundy }}>
+            AmanOr
+          </Text>
+        </View>
+
+        {/* ── TITLE + DIVIDER ── */}
+        <View style={{ alignItems: "center", marginTop: hp(2), marginBottom: hp(3) }}>
+          <Text style={{ fontFamily: "OtomanopeeOne_400Regular", fontSize: wp(8), color: C.burgundy }}>
+            Legal Guidance
+          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", marginTop: hp(1) }}>
+            <View style={{ width: wp(8), height: 1, backgroundColor: C.burgundy, opacity: 0.35 }} />
+            <Ionicons name="heart" size={wp(3.2)} color={C.burgundy} style={{ marginHorizontal: wp(2), opacity: 0.7 }} />
+            <View style={{ width: wp(8), height: 1, backgroundColor: C.burgundy, opacity: 0.35 }} />
+          </View>
+        </View>
+
+        {/* ── CARDS ── */}
+        <View style={{ gap: hp(2) }}>
+          {ITEMS.map(({ key, route, label, icon }) => (
+            <TouchableOpacity
+              key={key}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: C.cardBg,
+                borderColor: C.cardBorder,
+                borderWidth: 1,
+                borderRadius: wp(5),
+                paddingVertical: hp(1.8),
+                paddingHorizontal: wp(4.5),
+              }}
+              onPress={() => router.push(route)}
+              activeOpacity={0.85}
+            >
+              <View
+                style={{
+                  width: wp(13),
+                  height: wp(13),
+                  borderRadius: wp(6.5),
+                  backgroundColor: C.iconBg,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginRight: wp(4),
+                }}
+              >
+                <Ionicons name={icon} size={wp(6.5)} color={C.burgundy} />
+              </View>
+
+              <Text
+                style={{
+                  flex: 1,
+                  fontFamily: "Ledger_400Regular",
+                  fontSize: wp(4.2),
+                  color: C.burgundy,
+                  lineHeight: wp(5.4),
+                }}
+              >
+                {label}
+              </Text>
+
+              <Ionicons name="chevron-forward" size={wp(5)} color={C.chevron} />
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* ── BOTTOM ACTIONS: BACK + ASK AI ── */}
+        <View style={{ flexDirection: "row", gap: wp(3), marginTop: hp(4) }}>
+          <TouchableOpacity
+            style={{
+              flex: 1,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: C.backBg,
+              borderRadius: wp(7),
+              paddingVertical: hp(2),
+              gap: wp(1.5),
+            }}
+            onPress={() => router.replace("/(drawer)/home")}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="chevron-back" size={wp(4.5)} color={C.burgundy} />
+            <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(4.2), color: C.burgundy }}>
+              Back
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={{
+              flex: 1,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: C.burgundy,
+              borderRadius: wp(7),
+              paddingVertical: hp(2),
+              gap: wp(1.5),
+            }}
+            onPress={() => router.push("/(drawer)/ask-ai")}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="chatbubble-ellipses-outline" size={wp(4.5)} color={C.white} />
+            <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(4.2), color: C.white }}>
+              Ask AI
+            </Text>
+          </TouchableOpacity>
+        </View>
+
       </View>
-
-      <View style={styles.body}>
-
-        {/* ── TITLE ── */}
-        <Text style={styles.title}>Your Legal Rights</Text>
-
-        {/* ── SUBTITLE ── */}
-        {/* <Text style={styles.subtitle}>
-          Learn Your Rights Against{"\n"}Workplace Sexual Harassment
-        </Text> */}
-
-        <View style={{ height: 40 }} />
-
-        {/* ── BUTTON 1: What Is Workplace Sexual Harassment ── */}
-        <TouchableOpacity
-          style={[styles.btn, { backgroundColor: C.btnPink }]}
-          onPress={() => router.push("/(drawer)/legal-what")}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.btnText}>
-          What is workplace{"\n"}Sexual Harassment?
-          </Text>
-        </TouchableOpacity>
-
-        <View style={{ height: 16 }} />
-
-        {/* ── BUTTON 2: Examples of Sexual Harassment ──
-        <TouchableOpacity
-          style={[styles.btn, { backgroundColor: C.btnPink }]}
-          onPress={() => router.push("/(drawer)/legal-what")}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.btnText}>
-            Examples of{"\n"}Sexual Harassment
-          </Text>
-        </TouchableOpacity>
-
-        <View style={{ height: 16 }} /> */}
-
-        {/* ── BUTTON 3: Your Rights & Legal Options ── */}
-        <TouchableOpacity
-          style={[styles.btn, { backgroundColor: C.btnPink }]}
-          onPress={() => router.push("/(drawer)/legal")}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.btnText}>Your Rights</Text>
-        </TouchableOpacity>
-
-        <View style={{ height: 16 }} />
-
-        <TouchableOpacity
-          style={[styles.btn, { backgroundColor: C.btnPink }]}
-          onPress={() => router.push("/(drawer)/legal-employer")}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.btnText}>What Employers Must Do</Text>
-        </TouchableOpacity>
-
-        <View style={{ height: 16 }} />
-
-        {/* ── BUTTON 3: Get Professional Legal Guidance ──
-        <TouchableOpacity
-          style={[styles.btn, { backgroundColor: C.btnPink }]}
-          onPress={() => router.push("/(drawer)/legal-lawyer")}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.btnText}>
-            Get Professional Legal{"\n"}Guidance
-          </Text>
-        </TouchableOpacity> */}
-
-      </View>
-
-      <TouchableOpacity style={styles.backLink} onPress={() => router.replace("/(drawer)/home")}>
-        <Text style={styles.backLinkText}>{"< Back"}</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: C.bg,
-  },
-
-  topBulb: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    alignItems: "flex-start",
-  },
-  bulb: {
-    width: 36,
-    height: 36,
-    opacity: 0.6,
-  },
-
-  body: {
-    flex: 1,
-    paddingHorizontal: 28,
-    paddingTop: 24,
-  },
-
-  title: {
-    fontFamily: "OtomanopeeOne_400Regular",
-    fontSize: 38,
-    color: C.burgundy,
-    lineHeight: 46,
-    marginBottom: 20,
-  },
-
-  subtitle: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 15,
-    color: C.muted,
-    lineHeight: 24,
-    textAlign: "center",
-  },
-
-  // option buttons
-  btn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 16,
-    paddingVertical: 18,
-    paddingHorizontal: 18,
-    gap: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  btnIconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.6)",
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  btnIconText: {
-    fontSize: 18,
-    color: C.white,
-  },
-  btnText: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 16,
-    color: C.white,
-    lineHeight: 23,
-    flex: 1,
-    textAlign: "center",
-  },
-  backLink: { backgroundColor: C.burgundy, borderRadius: 40, paddingVertical: 18, alignItems: "center", marginHorizontal: 28, marginBottom: 16, shadowColor: C.burgundy, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 4 },
-  backLinkText: { fontFamily: "Ledger_400Regular", fontSize: 20, color: C.white, letterSpacing: 0.5 },
-});
