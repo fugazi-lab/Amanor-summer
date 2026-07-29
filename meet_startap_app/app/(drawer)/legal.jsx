@@ -29,12 +29,15 @@ const C = {
 };
 
 const BULLETS = [
-  "Safe Workplace: Employers Must Prevent Harassment And Have Clear Reporting Procedures.",
-  "Report The Incident: You Can Report To The Workplace Harassment Officer, HR, Or A Manager. The Complaint Must Be Investigated Confidentially.",
-  "Protection: It Is Illegal For An Employer To Punish Or Fire You For Reporting Harassment.",
-  "Police Report: Serious Cases Can Be Reported To The Police.",
-  "Compensation: Victims May File A Claim In Labor Court And Receive Financial Compensation.",
-  "Privacy & Support: Your Identity Can Be Protected, And You Can Receive Legal And Emotional Support.",
+ "Submit a workplace complaint, either orally or in writing. You may also have another person submit it on your behalf.",
+"Have your complaint investigated promptly and as privately as possible.",
+"Be protected from retaliation or workplace harm, such as dismissal, demotion, reduced hours, or unfair treatment.",
+"Be separated from the person you complained about, when appropriate and possible.",
+"Receive a reasoned written decision and review the investigation summary and recommendations.",
+"File a police complaint, a civil lawsuit, or both, in addition to your workplace complaint.",
+"Not be required to prove that you clearly rejected repeated sexual advances or comments when a manager or supervisor abused their authority.",
+"Apply for recognition as a work-injury victim if the harassment caused you physical or psychological harm. This may entitle you to medical treatment, injury benefits, or disability benefits.",
+"Apply for unemployment benefits without the usual waiting period if you resigned because of workplace sexual harassment, subject to the applicable eligibility requirements."
 ];
 
 export default function LegalScreen() {
@@ -44,6 +47,7 @@ export default function LegalScreen() {
   const swipeX = useRef(0);
   const previous = (right - 1 + BULLETS.length) % BULLETS.length;
   const next = (right + 1) % BULLETS.length;
+  const sideColor = right % 2 ? "#D98FA3" : "#C49378";
 
   const [fontsLoaded] = useFonts({
     OtomanopeeOne_400Regular,
@@ -110,13 +114,13 @@ export default function LegalScreen() {
             if (distance < -40) setRight(next);
           }}
         >
-          <TouchableOpacity style={[styles.sideCard, { backgroundColor: previous % 2 ? "#C49378" : "#D98FA3" }]} onPress={() => setRight(previous)}>
+          <TouchableOpacity style={[styles.sideCard, { backgroundColor: sideColor }]} onPress={() => setRight(previous)}>
             <Text style={styles.arrow}>‹</Text>
           </TouchableOpacity>
           <View style={[styles.rightCard, { backgroundColor: right % 2 ? "#C49378" : "#D98FA3" }]}>
             <Text style={styles.rightText}>{BULLETS[right]}</Text>
           </View>
-          <TouchableOpacity style={[styles.sideCard, { backgroundColor: next % 2 ? "#C49378" : "#D98FA3" }]} onPress={() => setRight(next)}>
+          <TouchableOpacity style={[styles.sideCard, { backgroundColor: sideColor }]} onPress={() => setRight(next)}>
             <Text style={styles.arrow}>›</Text>
           </TouchableOpacity>
         </View>
