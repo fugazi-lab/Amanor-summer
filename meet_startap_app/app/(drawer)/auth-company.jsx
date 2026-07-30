@@ -9,6 +9,7 @@
 
 import { Ledger_400Regular } from "@expo-google-fonts/ledger";
 import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
+import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -19,10 +20,10 @@ import {
     Platform,
     SafeAreaView,
     ScrollView,
-    StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
+    useWindowDimensions,
     View,
 } from "react-native";
 import { Client, Databases, Query } from "react-native-appwrite";
@@ -46,7 +47,7 @@ const C = {
   burgundy: "#7a2035",
   text:     "#3a2020",
   muted:    "#9a8070",
-  border:   "#9a8070",
+  border:   "#d9bfc2",
   white:    "#ffffff",
 };
 
@@ -63,6 +64,13 @@ const findCompanyByUsername = async (username) => {
 
 export default function CompanyAuthScreen() {
   const router = useRouter();
+  const { width, height } = useWindowDimensions();
+
+  // clamp scaling width to a phone-like max so proportions stay consistent
+  // on wide viewports (pc / tablet / web) instead of ballooning with them
+  const layoutWidth = Math.min(width, 480);
+  const wp = (p) => (layoutWidth * p) / 100;
+  const hp = (p) => (height * p) / 100;
 
   const [username, setUsername]       = useState("");
   const [password, setPassword]       = useState("");
@@ -111,37 +119,97 @@ export default function CompanyAuthScreen() {
 
   if (!fontsLoaded) {
     return (
-      <SafeAreaView style={[styles.root, { justifyContent: "center", alignItems: "center" }]}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: C.bg, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator color={C.burgundy} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.root}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }}>
+
+      {/* ── BACK ── */}
+      <TouchableOpacity
+        style={{ position: "absolute", top: hp(2), left: wp(5), zIndex: 10, flexDirection: "row", alignItems: "center" }}
+        onPress={() => router.replace("/(drawer)/role-pick")}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <Ionicons name="chevron-back" size={wp(5)} color={C.burgundy} />
+        <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.8), color: C.burgundy, marginLeft: wp(1) }}>
+          Back
+        </Text>
+      </TouchableOpacity>
+
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
-          contentContainerStyle={styles.scroll}
+          contentContainerStyle={{
+            flexGrow: 1,
+            width: "100%",
+            maxWidth: 480,
+            alignSelf: "center",
+            paddingHorizontal: wp(9),
+            paddingTop: hp(7),
+            paddingBottom: hp(4),
+            justifyContent: "center",
+          }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
 
-          {/* ── TITLE ── */}
-          <Text style={styles.title}>Company{"\n"}Log In</Text>
+          {/* ── LOGO ── */}
+          <View style={{ alignItems: "center", marginBottom: hp(2) }}>
+            <Image
+              source={require("../../assets/bulblogo.png")}
+              style={{ width: wp(13), height: wp(13) }}
+              resizeMode="contain"
+            />
+          </View>
 
-          <Text style={styles.subtitle}>
+          {/* ── TITLE ── */}
+          <Text
+            style={{
+              fontFamily: "OtomanopeeOne_400Regular",
+              fontSize: wp(9),
+              color: C.burgundy,
+              textAlign: "center",
+              marginBottom: hp(1.2),
+            }}
+          >
+            Company Log In
+          </Text>
+
+          <Text
+            style={{
+              fontFamily: "Ledger_400Regular",
+              fontSize: wp(3.4),
+              color: C.muted,
+              textAlign: "center",
+              lineHeight: wp(4.6),
+              marginBottom: hp(4),
+              paddingHorizontal: wp(2),
+            }}
+          >
             Use the username, password, and company code AmanOr gave you.
           </Text>
 
-          <View style={{ height: 40 }} />
-
           {/* ── USERNAME ── */}
-          <View style={styles.inputWrap}>
+          <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.6), color: C.muted, marginBottom: hp(1) }}>
+            Username
+          </Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: C.border,
+              borderRadius: wp(3.5),
+              paddingHorizontal: wp(4),
+              marginBottom: hp(2.5),
+            }}
+          >
             <TextInput
-              style={styles.input}
+              style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.8), color: C.text, paddingVertical: hp(1.6) }}
               placeholder="Username"
               placeholderTextColor={C.muted}
               autoCapitalize="none"
@@ -151,12 +219,21 @@ export default function CompanyAuthScreen() {
             />
           </View>
 
-          <View style={{ height: 28 }} />
-
           {/* ── PASSWORD ── */}
-          <View style={styles.inputWrap}>
+          <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.6), color: C.muted, marginBottom: hp(1) }}>
+            Password
+          </Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: C.border,
+              borderRadius: wp(3.5),
+              paddingHorizontal: wp(4),
+              marginBottom: hp(2.5),
+            }}
+          >
             <TextInput
-              style={styles.input}
+              style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.8), color: C.text, paddingVertical: hp(1.6) }}
               placeholder="Password"
               placeholderTextColor={C.muted}
               secureTextEntry
@@ -165,12 +242,20 @@ export default function CompanyAuthScreen() {
             />
           </View>
 
-          <View style={{ height: 28 }} />
-
           {/* ── COMPANY CODE ── */}
-          <View style={styles.inputWrap}>
+          <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.6), color: C.muted, marginBottom: hp(1) }}>
+            Company Code
+          </Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: C.border,
+              borderRadius: wp(3.5),
+              paddingHorizontal: wp(4),
+            }}
+          >
             <TextInput
-              style={styles.input}
+              style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.8), color: C.text, paddingVertical: hp(1.6) }}
               placeholder="Company Code"
               placeholderTextColor={C.muted}
               autoCapitalize="characters"
@@ -182,14 +267,29 @@ export default function CompanyAuthScreen() {
 
           {/* ── ERROR ── */}
           {errorMsg !== "" && (
-            <Text style={styles.errorText}>⚠ {errorMsg}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", marginTop: hp(1.8) }}>
+              <Ionicons name="alert-circle-outline" size={wp(4)} color={C.burgundy} />
+              <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.4), color: C.burgundy, marginLeft: wp(1.5), flex: 1 }}>
+                {errorMsg}
+              </Text>
+            </View>
           )}
-
-          <View style={{ height: 40 }} />
 
           {/* ── SUBMIT BUTTON ── */}
           <TouchableOpacity
-            style={[styles.button, loading && { opacity: 0.7 }]}
+            style={{
+              backgroundColor: C.burgundy,
+              borderRadius: wp(10),
+              paddingVertical: hp(2.2),
+              alignItems: "center",
+              marginTop: hp(4),
+              opacity: loading ? 0.7 : 1,
+              shadowColor: C.burgundy,
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.25,
+              shadowRadius: 12,
+              elevation: 5,
+            }}
             onPress={handleLogin}
             disabled={loading}
             activeOpacity={0.85}
@@ -197,144 +297,29 @@ export default function CompanyAuthScreen() {
             {loading ? (
               <ActivityIndicator color={C.white} />
             ) : (
-              <Text style={styles.buttonText}>Log In</Text>
+              <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(5), color: C.white, letterSpacing: 1 }}>
+                Log In
+              </Text>
             )}
           </TouchableOpacity>
 
-          <View style={{ height: 20 }} />
-
           {/* ── NO ACCOUNT HINT ── */}
-          <Text style={styles.noAccountText}>
+          <Text
+            style={{
+              fontFamily: "Ledger_400Regular",
+              fontSize: wp(3.2),
+              color: C.muted,
+              textAlign: "center",
+              lineHeight: wp(4.4),
+              marginTop: hp(2.5),
+              paddingHorizontal: wp(2),
+            }}
+          >
             Don't have credentials yet? Contact AmanOr to set up your company account.
           </Text>
 
-          <View style={{ flex: 1, minHeight: 60 }} />
-
-          {/* ── LOGO ── */}
-          <View style={styles.bottomLogoWrap}>
-            <Image
-              source={require("../../assets/bulblogo.png")}
-              style={styles.bottomLogo}
-              resizeMode="contain"
-            />
-          </View>
-
         </ScrollView>
       </KeyboardAvoidingView>
-
-      <TouchableOpacity style={styles.backLink} onPress={() => router.replace("/(drawer)/role-pick")}>
-        <Text style={styles.backLinkText}>{"< Back"}</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: C.bg,
-  },
-  scroll: {
-    flexGrow: 1,
-    paddingHorizontal: "9%",
-    paddingTop: "14%",
-    paddingBottom: 32,
-  },
-
-  title: {
-    fontFamily: "OtomanopeeOne_400Regular",
-    fontSize: 48,
-    color: C.burgundy,
-    textAlign: "center",
-    lineHeight: 58,
-    letterSpacing: 0.5,
-  },
-
-  subtitle: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 13,
-    color: C.muted,
-    textAlign: "center",
-    marginTop: 14,
-    lineHeight: 19,
-  },
-
-  inputWrap: {
-    borderBottomWidth: 1,
-    borderBottomColor: C.border,
-  },
-  input: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 15,
-    color: C.text,
-    paddingVertical: 10,
-    paddingHorizontal: 0,
-  },
-
-  errorText: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 13,
-    color: C.burgundy,
-    marginTop: 14,
-  },
-
-  button: {
-    backgroundColor: C.burgundy,
-    borderRadius: 40,
-    paddingVertical: 18,
-    alignItems: "center",
-    shadowColor: C.burgundy,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 5,
-  },
-  buttonText: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 22,
-    color: C.white,
-    letterSpacing: 1,
-  },
-
-  noAccountText: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 12.5,
-    color: C.muted,
-    textAlign: "center",
-    lineHeight: 18,
-  },
-
-  backLink: {
-    backgroundColor: C.burgundy,
-    borderRadius: 40,
-    paddingVertical: 18,
-    alignItems: "center",
-    marginHorizontal: 36,
-    marginBottom: 16,
-    shadowColor: C.burgundy,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  backLinkText: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 20,
-    color: C.white,
-    letterSpacing: 0.5,
-  },
-
-  bottomLogoWrap: {
-    position: "absolute",
-    right: "5%",
-    bottom: "4%",
-    width: "12%",
-    aspectRatio: 1,
-  },
-
-  bottomLogo: {
-    width: "100%",
-    height: "100%",
-    opacity: 0.35,
-  },
-});

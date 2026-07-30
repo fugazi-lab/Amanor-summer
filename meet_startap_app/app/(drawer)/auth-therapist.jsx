@@ -8,6 +8,7 @@
 
 import { Ledger_400Regular } from "@expo-google-fonts/ledger";
 import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
+import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
@@ -20,10 +21,10 @@ import {
     Platform,
     SafeAreaView,
     ScrollView,
-    StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
+    useWindowDimensions,
     View,
 } from "react-native";
 import { Client, Databases, ID, Query } from "react-native-appwrite";
@@ -47,7 +48,7 @@ const C = {
   burgundy: "#7a2035",
   text:     "#3a2020",
   muted:    "#9a8070",
-  border:   "#9a8070",
+  border:   "#d9bfc2",
   white:    "#ffffff",
 };
 
@@ -64,6 +65,13 @@ const findTherapistByUsername = async (username) => {
 
 export default function TherapistAuthScreen() {
   const router = useRouter();
+  const { width, height } = useWindowDimensions();
+
+  // clamp scaling width to a phone-like max so proportions stay consistent
+  // on wide viewports (pc / tablet / web) instead of ballooning with them
+  const layoutWidth = Math.min(width, 480);
+  const wp = (p) => (layoutWidth * p) / 100;
+  const hp = (p) => (height * p) / 100;
 
   const [mode, setMode]           = useState("login");
   const [username, setUsername]   = useState("");
@@ -174,35 +182,83 @@ export default function TherapistAuthScreen() {
 
   if (!fontsLoaded) {
     return (
-      <SafeAreaView style={[styles.root, { justifyContent: "center", alignItems: "center" }]}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: C.bg, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator color={C.burgundy} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.root}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }}>
+
+      {/* ── BACK ── */}
+      <TouchableOpacity
+        style={{ position: "absolute", top: hp(2), left: wp(5), zIndex: 10, flexDirection: "row", alignItems: "center" }}
+        onPress={() => router.replace("/(drawer)/role-pick")}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <Ionicons name="chevron-back" size={wp(5)} color={C.burgundy} />
+        <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.8), color: C.burgundy, marginLeft: wp(1) }}>
+          Back
+        </Text>
+      </TouchableOpacity>
+
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
-          contentContainerStyle={styles.scroll}
+          contentContainerStyle={{
+            flexGrow: 1,
+            width: "100%",
+            maxWidth: 480,
+            alignSelf: "center",
+            paddingHorizontal: wp(9),
+            paddingTop: hp(7),
+            paddingBottom: hp(4),
+            justifyContent: "center",
+          }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
 
+          {/* ── LOGO ── */}
+          <View style={{ alignItems: "center", marginBottom: hp(2) }}>
+            <Image
+              source={require("../../assets/bulblogo.png")}
+              style={{ width: wp(13), height: wp(13) }}
+              resizeMode="contain"
+            />
+          </View>
+
           {/* ── TITLE ── */}
-          <Text style={styles.title}>
-            {isLogin ? "Therapist\nLog In" : "Therapist\nSign Up"}
+          <Text
+            style={{
+              fontFamily: "OtomanopeeOne_400Regular",
+              fontSize: wp(7.5),
+              color: C.burgundy,
+              textAlign: "center",
+              marginBottom: hp(4),
+            }}
+          >
+            {isLogin ? "Therapist Log In" : "Therapist Sign Up"}
           </Text>
 
-          <View style={{ height: 40 }} />
-
           {/* ── USERNAME ── */}
-          <View style={styles.inputWrap}>
+          <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.6), color: C.muted, marginBottom: hp(1) }}>
+            Username
+          </Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: C.border,
+              borderRadius: wp(3.5),
+              paddingHorizontal: wp(4),
+              marginBottom: hp(2.5),
+            }}
+          >
             <TextInput
-              style={styles.input}
+              style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.8), color: C.text, paddingVertical: hp(1.6) }}
               placeholder="Username"
               placeholderTextColor={C.muted}
               autoCapitalize="none"
@@ -212,12 +268,20 @@ export default function TherapistAuthScreen() {
             />
           </View>
 
-          <View style={{ height: 28 }} />
-
           {/* ── PASSWORD ── */}
-          <View style={styles.inputWrap}>
+          <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.6), color: C.muted, marginBottom: hp(1) }}>
+            Password
+          </Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: C.border,
+              borderRadius: wp(3.5),
+              paddingHorizontal: wp(4),
+            }}
+          >
             <TextInput
-              style={styles.input}
+              style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.8), color: C.text, paddingVertical: hp(1.6) }}
               placeholder="Password"
               placeholderTextColor={C.muted}
               secureTextEntry
@@ -229,12 +293,20 @@ export default function TherapistAuthScreen() {
           {/* ── SIGN UP ONLY FIELDS ── */}
           {!isLogin && (
             <>
-              <View style={{ height: 28 }} />
-
               {/* phone number */}
-              <View style={styles.inputWrap}>
+              <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.6), color: C.muted, marginTop: hp(2.5), marginBottom: hp(1) }}>
+                Phone Number
+              </Text>
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderColor: C.border,
+                  borderRadius: wp(3.5),
+                  paddingHorizontal: wp(4),
+                }}
+              >
                 <TextInput
-                  style={styles.input}
+                  style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.8), color: C.text, paddingVertical: hp(1.6) }}
                   placeholder="Phone Number"
                   placeholderTextColor={C.muted}
                   keyboardType="phone-pad"
@@ -243,31 +315,45 @@ export default function TherapistAuthScreen() {
                 />
               </View>
 
-              <View style={{ height: 28 }} />
-
               {/* certification ID image */}
-              <Text style={styles.certLabel}>Certification ID</Text>
+              <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.6), color: C.muted, marginTop: hp(2.5), marginBottom: hp(1.2) }}>
+                Certification ID
+              </Text>
               <TouchableOpacity
-                style={styles.certPickerBtn}
+                style={{
+                  borderWidth: 1.5,
+                  borderColor: C.border,
+                  borderStyle: "dashed",
+                  borderRadius: wp(3.5),
+                  overflow: "hidden",
+                }}
                 onPress={handlePickCert}
                 activeOpacity={0.85}
               >
                 {certImage ? (
                   <Image
                     source={{ uri: certImage }}
-                    style={styles.certPreview}
+                    style={{ width: "100%", height: hp(19) }}
                     resizeMode="cover"
                   />
                 ) : (
-                  <View style={styles.certPlaceholder}>
-                    <Text style={styles.certPlaceholderIcon}>📄</Text>
-                    <Text style={styles.certPlaceholderText}>Tap to attach certification image</Text>
+                  <View style={{ height: hp(15.5), alignItems: "center", justifyContent: "center", gap: hp(1.2) }}>
+                    <Ionicons name="document-text-outline" size={wp(8)} color={C.muted} />
+                    <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.6), color: C.muted, textAlign: "center", paddingHorizontal: wp(6) }}>
+                      Tap to attach certification image
+                    </Text>
                   </View>
                 )}
               </TouchableOpacity>
               {certImage && (
-                <TouchableOpacity onPress={() => setCertImage(null)} style={styles.certRemove}>
-                  <Text style={styles.certRemoveText}>✕ Remove</Text>
+                <TouchableOpacity
+                  onPress={() => setCertImage(null)}
+                  style={{ flexDirection: "row", alignItems: "center", alignSelf: "flex-end", marginTop: hp(1) }}
+                >
+                  <Ionicons name="close-circle-outline" size={wp(4)} color={C.burgundy} />
+                  <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.6), color: C.burgundy, marginLeft: wp(1) }}>
+                    Remove
+                  </Text>
                 </TouchableOpacity>
               )}
             </>
@@ -275,14 +361,29 @@ export default function TherapistAuthScreen() {
 
           {/* ── ERROR ── */}
           {errorMsg !== "" && (
-            <Text style={styles.errorText}>⚠ {errorMsg}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", marginTop: hp(1.8) }}>
+              <Ionicons name="alert-circle-outline" size={wp(4)} color={C.burgundy} />
+              <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.4), color: C.burgundy, marginLeft: wp(1.5), flex: 1 }}>
+                {errorMsg}
+              </Text>
+            </View>
           )}
-
-          <View style={{ height: 40 }} />
 
           {/* ── SUBMIT BUTTON ── */}
           <TouchableOpacity
-            style={[styles.button, loading && { opacity: 0.7 }]}
+            style={{
+              backgroundColor: C.burgundy,
+              borderRadius: wp(10),
+              paddingVertical: hp(2.2),
+              alignItems: "center",
+              marginTop: hp(4),
+              opacity: loading ? 0.7 : 1,
+              shadowColor: C.burgundy,
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.25,
+              shadowRadius: 12,
+              elevation: 5,
+            }}
             onPress={isLogin ? handleLogin : handleSignup}
             disabled={loading}
             activeOpacity={0.85}
@@ -290,196 +391,33 @@ export default function TherapistAuthScreen() {
             {loading ? (
               <ActivityIndicator color={C.white} />
             ) : (
-              <Text style={styles.buttonText}>
+              <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(5), color: C.white, letterSpacing: 1 }}>
                 {isLogin ? "Log In" : "Sign Up"}
               </Text>
             )}
           </TouchableOpacity>
 
-          <View style={{ height: 24 }} />
+          {/* ── DOT DIVIDER ── */}
+          <View style={{ flexDirection: "row", alignItems: "center", marginTop: hp(3.5), marginBottom: hp(2.5) }}>
+            <View style={{ flex: 1, height: 1, backgroundColor: C.border, opacity: 0.7 }} />
+            <Ionicons name="ellipse" size={wp(1.6)} color={C.burgundy} style={{ marginHorizontal: wp(2) }} />
+            <View style={{ flex: 1, height: 1, backgroundColor: C.border, opacity: 0.7 }} />
+          </View>
 
           {/* ── SWITCH MODE ── */}
-          <View style={styles.switchRow}>
-            <Text style={styles.switchBase}>
+          <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
+            <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.6), color: C.text }}>
               {isLogin ? "Don't have an account?  " : "Already have an account?  "}
             </Text>
             <TouchableOpacity onPress={() => { setMode(isLogin ? "signup" : "login"); clearError(); }}>
-              <Text style={styles.switchLink}>
+              <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.6), color: C.burgundy, fontWeight: "700" }}>
                 {isLogin ? "Sign Up" : "Log In"}
               </Text>
             </TouchableOpacity>
           </View>
 
-          <View style={{ flex: 1, minHeight: 60 }} />
-
-          {/* ── LOGO ── */}
-          <View style={styles.bottomLogoWrap}>
-            <Image
-              source={require("../../assets/bulblogo.png")}
-              style={styles.bottomLogo}
-              resizeMode="contain"
-            />
-          </View>
-
         </ScrollView>
       </KeyboardAvoidingView>
-
-      <TouchableOpacity style={styles.backLink} onPress={() => router.replace("/(drawer)/role-pick")}>
-        <Text style={styles.backLinkText}>{"< Back"}</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: C.bg,
-  },
-  scroll: {
-    flexGrow: 1,
-    paddingHorizontal: "9%",
-    paddingTop: "14%",
-    paddingBottom: 32,
-  },
-
-  title: {
-    fontFamily: "OtomanopeeOne_400Regular",
-    fontSize: 48,
-    color: C.burgundy,
-    textAlign: "center",
-    lineHeight: 58,
-    letterSpacing: 0.5,
-  },
-
-  inputWrap: {
-    borderBottomWidth: 1,
-    borderBottomColor: C.border,
-  },
-  input: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 15,
-    color: C.text,
-    paddingVertical: 10,
-    paddingHorizontal: 0,
-  },
-
-  // cert image
-  certLabel: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 13,
-    color: C.muted,
-    marginBottom: 10,
-  },
-  certPickerBtn: {
-    borderWidth: 1.5,
-    borderColor: C.border,
-    borderStyle: "dashed",
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  certPreview: {
-    width: "100%",
-    height: 160,
-  },
-  certPlaceholder: {
-    height: 130,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-  },
-  certPlaceholderIcon: {
-    fontSize: 32,
-  },
-  certPlaceholderText: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 13,
-    color: C.muted,
-    textAlign: "center",
-  },
-  certRemove: {
-    alignSelf: "flex-end",
-    marginTop: 8,
-  },
-  certRemoveText: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 13,
-    color: C.burgundy,
-  },
-
-  errorText: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 13,
-    color: C.burgundy,
-    marginTop: 14,
-  },
-
-  button: {
-    backgroundColor: C.burgundy,
-    borderRadius: 40,
-    paddingVertical: 18,
-    alignItems: "center",
-    shadowColor: C.burgundy,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 5,
-  },
-  buttonText: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 22,
-    color: C.white,
-    letterSpacing: 1,
-  },
-
-  switchRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    flexWrap: "wrap",
-  },
-  switchBase: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 14,
-    color: C.text,
-  },
-  switchLink: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 14,
-    color: C.burgundy,
-  },
-
-  backLink: {
-    backgroundColor: C.burgundy,
-    borderRadius: 40,
-    paddingVertical: 18,
-    alignItems: "center",
-    marginHorizontal: 36,
-    marginBottom: 16,
-    shadowColor: C.burgundy,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  backLinkText: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 20,
-    color: C.white,
-    letterSpacing: 0.5,
-  },
-
-  bottomLogoWrap: {
-    position: "absolute",
-    right: "5%",
-    bottom: "4%",
-    width: "12%",
-    aspectRatio: 1,
-  },
-
-  bottomLogo: {
-    width: "100%",
-    height: "100%",
-    opacity: 0.35,
-  },
-});

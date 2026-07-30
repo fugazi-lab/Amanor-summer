@@ -5,7 +5,6 @@
 */
 
 import {
-  StyleSheet,
   View,
   Text,
   TextInput,
@@ -17,6 +16,7 @@ import {
   Image,
   Alert,
   ActivityIndicator,
+  useWindowDimensions,
 } from "react-native";
 import { useState } from "react";
 import { useRouter } from "expo-router";
@@ -24,6 +24,7 @@ import { Client, Databases, Query, ID } from "react-native-appwrite";
 import { useFonts } from "expo-font";
 import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
 import { Ledger_400Regular } from "@expo-google-fonts/ledger";
+import { Ionicons } from "@expo/vector-icons";
 
 const APPWRITE_CONFIG = {
   endpoint:   "https://cloud.appwrite.io/v1",
@@ -44,8 +45,7 @@ const C = {
   burgundy: "#7a2035",
   text:     "#3a2020",
   muted:    "#9a8070",
-  pink:     "#d4a0a8",
-  border:   "#9a8070",
+  border:   "#d9bfc2",
   white:    "#ffffff",
 };
 
@@ -62,6 +62,13 @@ const findUserByUsername = async (username) => {
 
 export default function AuthScreen() {
   const router = useRouter();
+  const { width, height } = useWindowDimensions();
+
+  // clamp scaling width to a phone-like max so proportions stay consistent
+  // on wide viewports (pc / tablet / web) instead of ballooning with them
+  const layoutWidth = Math.min(width, 480);
+  const wp = (p) => (layoutWidth * p) / 100;
+  const hp = (p) => (height * p) / 100;
 
   const [mode, setMode]         = useState("login");
   const [username, setUsername] = useState("");
@@ -133,37 +140,84 @@ export default function AuthScreen() {
 
   if (!fontsLoaded) {
     return (
-      <SafeAreaView style={[styles.root, { justifyContent: "center", alignItems: "center" }]}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: C.bg, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator color={C.burgundy} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.root}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }}>
+
+      {/* ── BACK ── */}
+      <TouchableOpacity
+        style={{ position: "absolute", top: hp(2), left: wp(5), zIndex: 10, flexDirection: "row", alignItems: "center" }}
+        onPress={() => router.replace("/(drawer)/role-pick")}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <Ionicons name="chevron-back" size={wp(5)} color={C.burgundy} />
+        <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.8), color: C.burgundy, marginLeft: wp(1) }}>
+          Back
+        </Text>
+      </TouchableOpacity>
+
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
-          contentContainerStyle={styles.scroll}
+          contentContainerStyle={{
+            flexGrow: 1,
+            width: "100%",
+            maxWidth: 480,
+            alignSelf: "center",
+            paddingHorizontal: wp(9),
+            paddingTop: hp(7),
+            paddingBottom: hp(4),
+            justifyContent: "center",
+          }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
 
+          {/* ── LOGO ── */}
+          <View style={{ alignItems: "center", marginBottom: hp(2) }}>
+            <Image
+              source={require("../assets/bulblogo.png")}
+              style={{ width: wp(13), height: wp(13) }}
+              resizeMode="contain"
+            />
+          </View>
+
           {/* ── TITLE ── */}
-          <Text style={styles.title}>
-            {isLogin ? "Log In\nNow" : "Sign Up\nNow"}
+          <Text
+            style={{
+              fontFamily: "OtomanopeeOne_400Regular",
+              fontSize: wp(9),
+              color: C.burgundy,
+              textAlign: "center",
+              marginBottom: hp(4),
+            }}
+          >
+            {isLogin ? "Log In Now" : "Sign Up Now"}
           </Text>
 
-          {/* ── SPACER ── */}
-          <View style={{ height: 48 }} />
-
           {/* ── USERNAME ── */}
-          <View style={styles.inputWrap}>
+          <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.6), color: C.muted, marginBottom: hp(1) }}>
+            Username (Anonymous Or Nickname)
+          </Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: C.border,
+              borderRadius: wp(3.5),
+              paddingHorizontal: wp(4),
+              marginBottom: hp(2.5),
+            }}
+          >
             <TextInput
-              style={styles.input}
-              placeholder="Username (Real or Anonymous)"
+              style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.8), color: C.text, paddingVertical: hp(1.6) }}
+              placeholder="e.g. brave_owl92"
               placeholderTextColor={C.muted}
               autoCapitalize="none"
               autoCorrect={false}
@@ -172,20 +226,21 @@ export default function AuthScreen() {
             />
           </View>
 
-          {/* hint only on signup
-          {!isLogin && (
-            <Text style={styles.hint}>
-              * Use an anonymous nickname. Do not use your real name.
-            </Text>
-          )} */}
-
-          <View style={{ height: 32 }} />
-
           {/* ── PASSWORD ── */}
-          <View style={styles.inputWrap}>
+          <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.6), color: C.muted, marginBottom: hp(1) }}>
+            Password
+          </Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: C.border,
+              borderRadius: wp(3.5),
+              paddingHorizontal: wp(4),
+            }}
+          >
             <TextInput
-              style={styles.input}
-              placeholder="Password"
+              style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.8), color: C.text, paddingVertical: hp(1.6) }}
+              placeholder="••••••••"
               placeholderTextColor={C.muted}
               secureTextEntry
               value={password}
@@ -195,14 +250,29 @@ export default function AuthScreen() {
 
           {/* ── ERROR ── */}
           {errorMsg !== "" && (
-            <Text style={styles.errorText}>⚠ {errorMsg}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", marginTop: hp(1.8) }}>
+              <Ionicons name="alert-circle-outline" size={wp(4)} color={C.burgundy} />
+              <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.4), color: C.burgundy, marginLeft: wp(1.5), flex: 1 }}>
+                {errorMsg}
+              </Text>
+            </View>
           )}
-
-          <View style={{ height: 40 }} />
 
           {/* ── SUBMIT BUTTON ── */}
           <TouchableOpacity
-            style={[styles.button, loading && { opacity: 0.7 }]}
+            style={{
+              backgroundColor: C.burgundy,
+              borderRadius: wp(10),
+              paddingVertical: hp(2.2),
+              alignItems: "center",
+              marginTop: hp(4),
+              opacity: loading ? 0.7 : 1,
+              shadowColor: C.burgundy,
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.25,
+              shadowRadius: 12,
+              elevation: 5,
+            }}
             onPress={isLogin ? handleLogin : handleSignup}
             disabled={loading}
             activeOpacity={0.85}
@@ -210,146 +280,35 @@ export default function AuthScreen() {
             {loading ? (
               <ActivityIndicator color={C.white} />
             ) : (
-              <Text style={styles.buttonText}>
+              <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(5), color: C.white, letterSpacing: 1 }}>
                 {isLogin ? "Log In" : "Sign Up"}
               </Text>
             )}
           </TouchableOpacity>
 
-          <View style={{ height: 24 }} />
+          {/* ── DOT DIVIDER ── */}
+          <View style={{ flexDirection: "row", alignItems: "center", marginTop: hp(3.5), marginBottom: hp(2.5) }}>
+            <View style={{ flex: 1, height: 1, backgroundColor: C.border, opacity: 0.7 }} />
+            <Ionicons name="ellipse" size={wp(1.6)} color={C.burgundy} style={{ marginHorizontal: wp(2) }} />
+            <View style={{ flex: 1, height: 1, backgroundColor: C.border, opacity: 0.7 }} />
+          </View>
 
           {/* ── SWITCH MODE LINK ── */}
-          <View style={styles.switchRow}>
-            <Text style={styles.switchBase}>
+          <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
+            <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.6), color: C.text }}>
               {isLogin ? "Don't have an account?  " : "Already have an account?  "}
             </Text>
             <TouchableOpacity
               onPress={() => { setMode(isLogin ? "signup" : "login"); clearError(); }}
             >
-              <Text style={styles.switchLink}>
+              <Text style={{ fontFamily: "Ledger_400Regular", fontSize: wp(3.6), color: C.burgundy, fontWeight: "700" }}>
                 {isLogin ? "Sign Up" : "Log In"}
               </Text>
             </TouchableOpacity>
           </View>
 
-          {/* ── SPACER pushes logo to bottom ── */}
-          <View style={{ flex: 1, minHeight: 60 }} />
-
-          {/* ── LOGO ── */}
-          <View style={styles.logoWrap}>
-            <Image
-              source={require("../assets/bulblogo.png")}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-          </View>
-
         </ScrollView>
       </KeyboardAvoidingView>
-
-      <TouchableOpacity style={styles.backBtn} onPress={() => router.replace("/(drawer)/role-pick")}>
-        <Text style={styles.backBtnText}>{"< Back"}</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: C.bg,
-  },
-  scroll: {
-    flexGrow: 1,
-    paddingHorizontal: 36,
-    paddingTop: 60,
-    paddingBottom: 32,
-  },
-
-  // big two-line title
-  title: {
-    fontFamily: "OtomanopeeOne_400Regular",
-    fontSize: 48,
-    color: C.burgundy,
-    textAlign: "center",
-    lineHeight: 56,
-    letterSpacing: 0.5,
-  },
-
-  // underline-only inputs
-  inputWrap: {
-    borderBottomWidth: 1,
-    borderBottomColor: C.border,
-  },
-  input: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 15,
-    color: C.text,
-    paddingVertical: 10,
-    paddingHorizontal: 0,
-  },
-
-  hint: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 11,
-    color: C.muted,
-    marginTop: 5,
-  },
-
-  errorText: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 13,
-    color: C.burgundy,
-    marginTop: 14,
-  },
-
-  // pill button
-  button: {
-    backgroundColor: C.burgundy,
-    borderRadius: 40,
-    paddingVertical: 18,
-    alignItems: "center",
-    shadowColor: C.burgundy,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 5,
-  },
-  buttonText: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 22,
-    color: C.white,
-    letterSpacing: 1,
-  },
-
-  // switch mode row
-  switchRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    flexWrap: "wrap",
-  },
-  switchBase: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 14,
-    color: C.text,
-  },
-  switchLink: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 14,
-    color: C.burgundy,
-  },
-
-  // logo bottom centre
-  logoWrap: {
-    alignItems: "center",
-    marginTop: 8,
-  },
-  logo: {
-    width: 40,
-    height: 40,
-    opacity: 0.5,
-  },
-  backBtn: { backgroundColor: C.burgundy, borderRadius: 40, paddingVertical: 18, alignItems: "center", marginHorizontal: 36, marginBottom: 16, shadowColor: C.burgundy, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 4 },
-  backBtnText: { fontFamily: "Ledger_400Regular", fontSize: 20, color: C.white, letterSpacing: 0.5 },
-});
