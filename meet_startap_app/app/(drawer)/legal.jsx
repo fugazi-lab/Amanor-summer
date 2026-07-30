@@ -18,11 +18,11 @@ import {
   TextInput,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
 import { Ledger_400Regular } from "@expo-google-fonts/ledger";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { askLegalAssistant } from "../../services/legal-ai";
 
 const C = {
@@ -48,9 +48,10 @@ const BULLETS = [
 
 export default function LegalScreen() {
   const router = useRouter();
+  const { openChat } = useLocalSearchParams();
   const [rightsOpen, setRightsOpen] = useState(false);
   const [right, setRight] = useState(0);
-  const [chatOpen, setChatOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(openChat === "true");
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const [messages, setMessages] = useState([
@@ -65,6 +66,12 @@ export default function LegalScreen() {
   const previous = (right - 1 + BULLETS.length) % BULLETS.length;
   const next = (right + 1) % BULLETS.length;
   const sideColor = right % 2 ? "#D98FA3" : "#C49378";
+
+  useEffect(() => {
+    if (openChat === "true") {
+      setChatOpen(true);
+    }
+  }, [openChat]);
 
   const [fontsLoaded] = useFonts({
     OtomanopeeOne_400Regular,
@@ -105,6 +112,13 @@ export default function LegalScreen() {
       ]);
     } finally {
       setChatLoading(false);
+    }
+  };
+
+  const closeChat = () => {
+    setChatOpen(false);
+    if (openChat === "true") {
+      router.back();
     }
   };
 
@@ -176,17 +190,6 @@ export default function LegalScreen() {
 
       </ScrollView>
 
-      <TouchableOpacity
-        style={styles.aiButton}
-        onPress={() => setChatOpen(true)}
-        activeOpacity={0.85}
-        accessibilityRole="button"
-        accessibilityLabel="Open Legal AI Assistant"
-      >
-        <Ionicons name="sparkles" size={19} color={C.white} />
-        <Text style={styles.aiButtonText}>Ask Legal AI</Text>
-      </TouchableOpacity>
-
       <TouchableOpacity style={styles.backBtn} onPress={() => router.replace("/(drawer)/legal-intro")}>
         <Text style={styles.backBtnText}>{"< Back"}</Text>
       </TouchableOpacity>
@@ -195,7 +198,7 @@ export default function LegalScreen() {
         visible={chatOpen}
         animationType="slide"
         presentationStyle="fullScreen"
-        onRequestClose={() => setChatOpen(false)}
+        onRequestClose={closeChat}
       >
         <SafeAreaView style={styles.chatRoot}>
           <KeyboardAvoidingView
@@ -213,7 +216,7 @@ export default function LegalScreen() {
               </View>
               <TouchableOpacity
                 style={styles.closeButton}
-                onPress={() => setChatOpen(false)}
+                onPress={closeChat}
                 accessibilityRole="button"
                 accessibilityLabel="Close chat"
               >
@@ -403,23 +406,6 @@ const styles = StyleSheet.create({
   dots: { flexDirection: "row", justifyContent: "center", gap: 6, marginTop: 14 },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.divider },
   dotActive: { width: 16, backgroundColor: C.burgundy },
-
-  aiButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    backgroundColor: C.burgundy,
-    borderRadius: 24,
-    paddingVertical: 13,
-    marginHorizontal: 28,
-    marginBottom: 10,
-  },
-  aiButtonText: {
-    fontFamily: "Ledger_400Regular",
-    fontSize: 15,
-    color: C.white,
-  },
 
   // back button
   backBtn: {
