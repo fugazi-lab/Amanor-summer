@@ -12,12 +12,18 @@ import {
   ScrollView,
   Image,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  TextInput,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 import { OtomanopeeOne_400Regular } from "@expo-google-fonts/otomanopee-one";
 import { Ledger_400Regular } from "@expo-google-fonts/ledger";
 import { useRef, useState } from "react";
+import { askLegalAssistant } from "../../services/legal-ai";
 
 const C = {
   bg:       "#F5F0E4",
@@ -44,7 +50,18 @@ export default function LegalScreen() {
   const router = useRouter();
   const [rightsOpen, setRightsOpen] = useState(false);
   const [right, setRight] = useState(0);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const [messages, setMessages] = useState([
+    {
+      id: "welcome",
+      role: "assistant",
+      text: "Hi, I’m Amanor’s legal information assistant. Ask me about workplace rights, reporting options, or legal procedures.",
+    },
+  ]);
   const swipeX = useRef(0);
+  const chatScrollRef = useRef(null);
   const previous = (right - 1 + BULLETS.length) % BULLETS.length;
   const next = (right + 1) % BULLETS.length;
   const sideColor = right % 2 ? "#D98FA3" : "#C49378";
@@ -61,6 +78,35 @@ export default function LegalScreen() {
       </SafeAreaView>
     );
   }
+
+  const sendMessage = async () => {
+    const question = chatInput.trim();
+    if (!question || chatLoading) return;
+
+    const userMessage = { id: `user-${Date.now()}`, role: "user", text: question };
+    setMessages((current) => [...current, userMessage]);
+    setChatInput("");
+    setChatLoading(true);
+
+    try {
+      const response = await askLegalAssistant(question);
+      setMessages((current) => [
+        ...current,
+        { id: `assistant-${Date.now()}`, role: "assistant", text: response.text },
+      ]);
+    } catch (error) {
+      setMessages((current) => [
+        ...current,
+        {
+          id: `error-${Date.now()}`,
+          role: "error",
+          text: error.message || "The assistant could not respond. Please try again.",
+        },
+      ]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.root}>
@@ -130,9 +176,132 @@ export default function LegalScreen() {
 
       </ScrollView>
 
+      <TouchableOpacity
+        style={styles.aiButton}
+        onPress={() => setChatOpen(true)}
+        activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityLabel="Open Legal AI Assistant"
+      >
+        <Ionicons name="sparkles" size={19} color={C.white} />
+        <Text style={styles.aiButtonText}>Ask Legal AI</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.backBtn} onPress={() => router.replace("/(drawer)/legal-intro")}>
         <Text style={styles.backBtnText}>{"< Back"}</Text>
       </TouchableOpacity>
+
+      <Modal
+        visible={chatOpen}
+        animationType="slide"
+        presentationStyle="fullScreen"
+        onRequestClose={() => setChatOpen(false)}
+      >
+        <SafeAreaView style={styles.chatRoot}>
+          <KeyboardAvoidingView
+            style={styles.chatKeyboard}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={0}
+          >
+            <View style={styles.chatHeader}>
+              <View style={styles.chatHeaderIcon}>
+                <Ionicons name="sparkles" size={19} color={C.burgundy} />
+              </View>
+              <View style={styles.chatHeaderCopy}>
+                <Text style={styles.chatTitle}>Legal AI Assistant</Text>
+                <Text style={styles.chatStatus}>Powered by Groq · General legal information</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setChatOpen(false)}
+                accessibilityRole="button"
+                accessibilityLabel="Close chat"
+              >
+                <Ionicons name="close" size={24} color={C.text} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.disclaimer}>
+              <Ionicons name="information-circle-outline" size={17} color={C.burgundy} />
+              <Text style={styles.disclaimerText}>
+                AI can make mistakes. This is legal information, not legal advice. Avoid sharing names or sensitive details.
+              </Text>
+            </View>
+
+            <ScrollView
+              ref={chatScrollRef}
+              style={styles.messages}
+              contentContainerStyle={styles.messagesContent}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
+              onContentSizeChange={() =>
+                chatScrollRef.current?.scrollToEnd({ animated: true })
+              }
+            >
+              {messages.map((message) => (
+                <View
+                  key={message.id}
+                  style={[
+                    styles.messageBubble,
+                    message.role === "user"
+                      ? styles.userBubble
+                      : message.role === "error"
+                        ? styles.errorBubble
+                        : styles.assistantBubble,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.messageText,
+                      message.role === "user" && styles.userMessageText,
+                    ]}
+                  >
+                    {message.text}
+                  </Text>
+                </View>
+              ))}
+              {chatLoading && (
+                <View style={[styles.messageBubble, styles.assistantBubble, styles.loadingBubble]}>
+                  <ActivityIndicator size="small" color={C.burgundy} />
+                  <Text style={styles.loadingText}>Finding an answer…</Text>
+                </View>
+              )}
+            </ScrollView>
+
+            <View style={styles.composer}>
+              <TextInput
+                style={styles.chatInput}
+                placeholder="Ask about your legal rights…"
+                placeholderTextColor={C.muted}
+                value={chatInput}
+                onChangeText={setChatInput}
+                multiline
+                maxLength={2000}
+                editable={!chatLoading}
+                onFocus={() =>
+                  setTimeout(
+                    () => chatScrollRef.current?.scrollToEnd({ animated: true }),
+                    150
+                  )
+                }
+              />
+              <TouchableOpacity
+                style={[
+                  styles.sendButton,
+                  (!chatInput.trim() || chatLoading) && styles.sendButtonDisabled,
+                ]}
+                onPress={sendMessage}
+                disabled={!chatInput.trim() || chatLoading}
+                accessibilityRole="button"
+                accessibilityLabel="Send message"
+              >
+                <Ionicons name="arrow-up" size={21} color={C.white} />
+              </TouchableOpacity>
+            </View>
+          </KeyboardAvoidingView>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -235,6 +404,23 @@ const styles = StyleSheet.create({
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.divider },
   dotActive: { width: 16, backgroundColor: C.burgundy },
 
+  aiButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: C.burgundy,
+    borderRadius: 24,
+    paddingVertical: 13,
+    marginHorizontal: 28,
+    marginBottom: 10,
+  },
+  aiButtonText: {
+    fontFamily: "Ledger_400Regular",
+    fontSize: 15,
+    color: C.white,
+  },
+
   // back button
   backBtn: {
     backgroundColor: C.burgundy,
@@ -255,4 +441,136 @@ const styles = StyleSheet.create({
     color: C.white,
     letterSpacing: 0.5,
   },
+
+  chatRoot: { flex: 1, backgroundColor: C.bg },
+  chatKeyboard: { flex: 1 },
+  chatHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: C.divider,
+  },
+  chatHeaderIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "#E8BAC5",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  chatHeaderCopy: { flex: 1 },
+  chatTitle: {
+    fontFamily: "OtomanopeeOne_400Regular",
+    fontSize: 16,
+    color: C.text,
+  },
+  chatStatus: {
+    fontFamily: "Ledger_400Regular",
+    fontSize: 11,
+    color: C.muted,
+    marginTop: 2,
+  },
+  closeButton: {
+    width: 38,
+    height: 38,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  disclaimer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 7,
+    backgroundColor: "#E8D8C8",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  disclaimerText: {
+    flex: 1,
+    fontFamily: "Ledger_400Regular",
+    fontSize: 10.5,
+    lineHeight: 15,
+    color: C.text,
+  },
+  messages: { flex: 1 },
+  messagesContent: {
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+    gap: 10,
+  },
+  messageBubble: {
+    maxWidth: "84%",
+    borderRadius: 17,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+  },
+  assistantBubble: {
+    alignSelf: "flex-start",
+    backgroundColor: "#E8D8C8",
+    borderBottomLeftRadius: 5,
+  },
+  userBubble: {
+    alignSelf: "flex-end",
+    backgroundColor: C.burgundy,
+    borderBottomRightRadius: 5,
+  },
+  errorBubble: {
+    alignSelf: "flex-start",
+    backgroundColor: "#F4D5D5",
+    borderWidth: 1,
+    borderColor: "#D59A9A",
+  },
+  messageText: {
+    fontFamily: "Ledger_400Regular",
+    fontSize: 14,
+    lineHeight: 21,
+    color: C.text,
+  },
+  userMessageText: { color: C.white },
+  loadingBubble: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 9,
+  },
+  loadingText: {
+    fontFamily: "Ledger_400Regular",
+    fontSize: 12,
+    color: C.muted,
+  },
+  composer: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: 10,
+    paddingHorizontal: 14,
+    paddingTop: 10,
+    paddingBottom: Platform.OS === "ios" ? 8 : 14,
+    borderTopWidth: 1,
+    borderTopColor: C.divider,
+    backgroundColor: C.bg,
+  },
+  chatInput: {
+    flex: 1,
+    maxHeight: 110,
+    minHeight: 46,
+    backgroundColor: C.white,
+    borderWidth: 1,
+    borderColor: C.divider,
+    borderRadius: 23,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    fontFamily: "Ledger_400Regular",
+    fontSize: 14,
+    color: C.text,
+  },
+  sendButton: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: C.burgundy,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sendButtonDisabled: { opacity: 0.4 },
 });
