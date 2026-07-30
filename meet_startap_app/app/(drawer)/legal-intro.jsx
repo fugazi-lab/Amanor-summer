@@ -187,7 +187,12 @@ export default function LegalIntroScreen() {
               paddingVertical: hp(2),
               gap: wp(1.5),
             }}
-            onPress={() => router.push("/(drawer)/ask-ai")}
+            onPress={() =>
+              router.push({
+                pathname: "/(drawer)/legal",
+                params: { openChat: "true" },
+              })
+            }
             activeOpacity={0.85}
           >
             <Ionicons name="chatbubble-ellipses-outline" size={wp(4.5)} color={C.white} />
